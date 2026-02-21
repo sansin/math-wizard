@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import QuestionCard from './QuestionCard';
+import ChallengeMode from './ChallengeMode';
 import { getModulesByGrade } from '../data/mathModules';
 
 const ALL_GRADES = ['KG-1', '2-3', '4-5', '6-7', '7-8', '9+'];
@@ -34,6 +35,18 @@ export default function ModuleSelector({ userId, userGrade, userProfile, onXPUpd
   const [mode, setMode] = useState(null);
   const [selectedGrade, setSelectedGrade] = useState(convertGradeFormat(userGrade) || '4-5');
   const [selectedModules, setSelectedModules] = useState([]);
+
+  if (mode === 'challenge') {
+    return (
+      <ChallengeMode
+        userId={userId}
+        userName={userProfile?.name || 'Player'}
+        userGrade={selectedGrade}
+        selectedModules={selectedModules}
+        onBack={() => setMode(null)}
+      />
+    );
+  }
 
   if (mode) {
     return (
@@ -223,20 +236,26 @@ export default function ModuleSelector({ userId, userGrade, userProfile, onXPUpd
             )}
 
             {/* Start Buttons */}
-            <div className="grid grid-cols-2 gap-2 flex-shrink-0">
+            <div className="grid grid-cols-3 gap-2 flex-shrink-0">
               <button
                 onClick={() => selectedModules.length > 0 && setMode('play')}
                 disabled={selectedModules.length === 0}
                 className="bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold py-3 min-h-[44px] rounded-lg hover:shadow-lg transform hover:scale-105 transition disabled:opacity-50 text-xs sm:text-sm"
               >
-                🎯 Play Mode
+                🎯 Play
               </button>
               <button
                 onClick={() => selectedModules.length > 0 && setMode('test')}
                 disabled={selectedModules.length === 0}
                 className="bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold py-3 min-h-[44px] rounded-lg hover:shadow-lg transform hover:scale-105 transition disabled:opacity-50 text-xs sm:text-sm"
               >
-                📝 Test Mode
+                📝 Test
+              </button>
+              <button
+                onClick={() => setMode('challenge')}
+                className="bg-gradient-to-r from-rose-500 to-pink-600 text-white font-bold py-3 min-h-[44px] rounded-lg hover:shadow-lg transform hover:scale-105 transition text-xs sm:text-sm"
+              >
+                ⚔️ Challenge
               </button>
             </div>
           </div>

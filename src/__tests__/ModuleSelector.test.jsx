@@ -72,22 +72,25 @@ describe('ModuleSelector', () => {
     expect(screen.getByText(/Choose Your Modules/i)).toBeInTheDocument();
   });
 
-  it('shows Play and Test mode buttons', () => {
+  it('shows Play, Test, and Challenge mode buttons', () => {
     render(<ModuleSelector {...defaultProps} />);
-    expect(screen.getByText(/Play Mode/i)).toBeInTheDocument();
-    expect(screen.getByText(/Test Mode/i)).toBeInTheDocument();
+    expect(screen.getByText(/Play/i)).toBeInTheDocument();
+    expect(screen.getByText(/Test/i)).toBeInTheDocument();
+    expect(screen.getByText(/Challenge/i)).toBeInTheDocument();
   });
 
-  it('disables mode buttons when no modules are selected', () => {
+  it('disables play/test buttons when no modules are selected', () => {
     render(<ModuleSelector {...defaultProps} />);
     // Clear all modules first
     const clearBtn = screen.queryByText(/Clear/i);
     if (clearBtn) {
       fireEvent.click(clearBtn);
     }
-    // Mode buttons should indicate they need modules
-    // The buttons may be disabled or have different text
-    const playBtn = screen.getByText(/Play Mode/i);
+    // Play and Test should be present
+    const playBtn = screen.getByText(/Play/i);
     expect(playBtn).toBeInTheDocument();
+    // Challenge button should always be enabled (for joining)
+    const challengeBtn = screen.getByText(/Challenge/i);
+    expect(challengeBtn).toBeInTheDocument();
   });
 });
