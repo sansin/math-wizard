@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Wizard hat body -->
+  <defs>
+    <linearGradient id="hat" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#4C1D95"/>
+    </linearGradient>
+    <linearGradient id="brim" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#6D28D9"/>
+      <stop offset="100%" stop-color="#5B21B6"/>
+    </linearGradient>
+  </defs>
+  <!-- Hat cone -->
+  <path d="M32 4 L50 52 L14 52 Z" fill="url(#hat)"/>
+  <!-- Hat brim -->
+  <ellipse cx="32" cy="52" rx="26" ry="8" fill="url(#brim)"/>
+  <!-- Hat band -->
+  <rect x="16" y="44" width="32" height="5" rx="2" fill="#F59E0B"/>
+  <!-- Star on hat -->
+  <polygon points="32,14 34.5,22 43,22 36.5,27 38.5,35 32,30 25.5,35 27.5,27 21,22 29.5,22" fill="#FDE68A"/>
+  <!-- Small sparkles -->
+  <circle cx="22" cy="20" r="1.5" fill="#FDE68A" opacity="0.7"/>
+  <circle cx="42" cy="18" r="1" fill="#FDE68A" opacity="0.6"/>
+  <circle cx="26" cy="38" r="1" fill="#FDE68A" opacity="0.5"/>
+</svg>
