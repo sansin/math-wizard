@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Line, Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
 import { getUserStats, getUserAnswerHistory } from '../services/databaseService';
 import { getUserXP, getLevelForXP, levelProgress, getLevelTitle, xpToNextLevel } from '../services/xpService';
 
-export default function AnalyticsDashboard({ userId }) {
+function AnalyticsDashboard({ userId }) {
   const [stats, setStats] = useState({
     totalQuestions: 0,
     accuracy: 0,
@@ -68,6 +68,75 @@ export default function AnalyticsDashboard({ userId }) {
     }
   };
 
+  // Chart data — memoized (must be before early returns to respect hooks rules)
+  const hasChartData = dailyAccuracy.labels.length > 0;
+  const accuracyChartData = useMemo(() => ({
+    labels: hasChartData ? dailyAccuracy.labels : ['No data yet'],
+    datasets: [{
+      label: 'Accuracy (%)',
+      data: hasChartData ? dailyAccuracy.data : [0],
+      borderColor: '#7C3AED',
+      backgroundColor: 'rgba(124, 58, 237, 0.1)',
+      tension: 0.4,
+      fill: true,
+      pointRadius: 6,
+      pointBackgroundColor: '#7C3AED',
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2,
+    }],
+  }), [hasChartData, dailyAccuracy]);
+
+  const weakAreaChartData = useMemo(() => ({
+    labels: stats.weakAreas.map(a => a.name.charAt(0).toUpperCase() + a.name.slice(1)),
+    datasets: [{
+      label: 'Accuracy by Topic (%)',
+      data: stats.weakAreas.map(a => a.accuracy),
+      backgroundColor: [
+        'rgba(255, 99, 132, 0.7)',
+        'rgba(54, 162, 235, 0.7)',
+        'rgba(255, 206, 86, 0.7)',
+        'rgba(75, 192, 192, 0.7)',
+        'rgba(153, 102, 255, 0.7)',
+      ],
+      borderColor: [
+        '#FF6384',
+        '#36A2EB',
+        '#FFCE56',
+        '#4BC0C0',
+        '#9966FF',
+      ],
+      borderWidth: 2,
+    }],
+  }), [stats.weakAreas]);
+
+  const chartOptions = useMemo(() => ({
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: {
+        display: true,
+        labels: {
+          font: { size: 12, weight: 'bold' },
+          padding: 15,
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 100,
+        ticks: {
+          font: { size: 11 },
+        },
+      },
+      x: {
+        ticks: {
+          font: { size: 11 },
+        },
+      },
+    },
+  }), []);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-violet-50 p-4 sm:p-6">
@@ -115,76 +184,6 @@ export default function AnalyticsDashboard({ userId }) {
       </div>
     );
   }
-
-  // Chart data - Accuracy trend (real data)
-  const hasChartData = dailyAccuracy.labels.length > 0;
-  const accuracyChartData = {
-    labels: hasChartData ? dailyAccuracy.labels : ['No data yet'],
-    datasets: [{
-      label: 'Accuracy (%)',
-      data: hasChartData ? dailyAccuracy.data : [0],
-      borderColor: '#7C3AED',
-      backgroundColor: 'rgba(124, 58, 237, 0.1)',
-      tension: 0.4,
-      fill: true,
-      pointRadius: 6,
-      pointBackgroundColor: '#7C3AED',
-      pointBorderColor: '#fff',
-      pointBorderWidth: 2,
-    }],
-  };
-
-  // Chart data - Weak areas
-  const weakAreaChartData = {
-    labels: stats.weakAreas.map(a => a.name.charAt(0).toUpperCase() + a.name.slice(1)),
-    datasets: [{
-      label: 'Accuracy by Topic (%)',
-      data: stats.weakAreas.map(a => a.accuracy),
-      backgroundColor: [
-        'rgba(255, 99, 132, 0.7)',
-        'rgba(54, 162, 235, 0.7)',
-        'rgba(255, 206, 86, 0.7)',
-        'rgba(75, 192, 192, 0.7)',
-        'rgba(153, 102, 255, 0.7)',
-      ],
-      borderColor: [
-        '#FF6384',
-        '#36A2EB',
-        '#FFCE56',
-        '#4BC0C0',
-        '#9966FF',
-      ],
-      borderWidth: 2,
-    }],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: true,
-    plugins: {
-      legend: {
-        display: true,
-        labels: {
-          font: { size: 12, weight: 'bold' },
-          padding: 15,
-        },
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        max: 100,
-        ticks: {
-          font: { size: 11 },
-        },
-      },
-      x: {
-        ticks: {
-          font: { size: 11 },
-        },
-      },
-    },
-  };
 
   return (
     <div className="min-h-screen bg-violet-50 p-4 sm:p-6">
@@ -383,3 +382,5 @@ export default function AnalyticsDashboard({ userId }) {
     </div>
   );
 }
+
+export default React.memo(AnalyticsDashboard);

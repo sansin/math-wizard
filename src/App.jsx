@@ -1,13 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense, useCallback } from 'react';
 import { auth } from './firebaseConfig';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { getUserProfile } from './services/databaseService';
 import { getUserXP, getLevelForXP, levelProgress } from './services/xpService';
 import Registration from './components/Registration';
-import ModuleSelector from './components/ModuleSelector';
-import AnalyticsDashboard from './components/AnalyticsDashboard';
-import ProfileSettings from './components/ProfileSettings';
 import './App.css';
+
+// Lazy-load heavy page components for code-splitting
+const ModuleSelector = lazy(() => import('./components/ModuleSelector'));
+const AnalyticsDashboard = lazy(() => import('./components/AnalyticsDashboard'));
+const ProfileSettings = lazy(() => import('./components/ProfileSettings'));
+const ParentDashboard = lazy(() => import('./components/ParentDashboard'));
+
+// Lightweight fallback shown while lazy chunks load
+const PageSpinner = () => (
+  <div className="flex items-center justify-center py-24">
+    <div className="text-4xl animate-wizard-bounce">🧙</div>
+  </div>
+);
 
 function App() {
   const [user, setUser] = useState(null);
@@ -50,11 +60,11 @@ function App() {
     }
   };
 
-  const handleRegistrationComplete = () => {
+  const handleRegistrationComplete = useCallback(() => {
     setCurrentPage('home');
-  };
+  }, []);
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     if (user) {
       try {
         const profile = await getUserProfile(user.uid);
@@ -65,10 +75,10 @@ function App() {
         console.error('Error refreshing profile:', error);
       }
     }
-  };
+  }, [user]);
 
   // Called by QuestionCard after each answer to keep nav XP bar live
-  const handleXPUpdate = (xpResult) => {
+  const handleXPUpdate = useCallback((xpResult) => {
     if (xpResult) {
       setXpData(prev => ({
         ...prev,
@@ -78,7 +88,7 @@ function App() {
         dailyGoal: xpResult.dailyGoal,
       }));
     }
-  };
+  }, []);
 
   // Loading state
   if (loading) {
@@ -175,6 +185,16 @@ function App() {
                 <span aria-hidden="true">⚙️</span> Settings
               </button>
               <button
+                onClick={() => setCurrentPage('parent')}
+                className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
+                  currentPage === 'parent'
+                    ? 'bg-white text-violet-700 shadow-lg'
+                    : 'hover:bg-white hover:bg-opacity-20'
+                }`}
+              >
+                <span aria-hidden="true">👨‍👩‍👧</span> Parent
+              </button>
+              <button
                 onClick={handleLogout}
                 className="px-4 py-2 rounded-lg font-semibold bg-red-600 hover:bg-red-700 transition"
               >
@@ -262,6 +282,16 @@ function App() {
                 ⚙️ Settings
               </button>
               <button
+                onClick={() => { setCurrentPage('parent'); setMenuOpen(false); }}
+                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition ${
+                  currentPage === 'parent'
+                    ? 'bg-white text-violet-700 shadow'
+                    : 'hover:bg-white hover:bg-opacity-20'
+                }`}
+              >
+                👨‍👩‍👧 Parent
+              </button>
+              <button
                 onClick={() => { handleLogout(); setMenuOpen(false); }}
                 className="w-full text-left px-4 py-3 rounded-lg font-semibold bg-red-600 hover:bg-red-700 transition"
               >
@@ -274,6 +304,7 @@ function App() {
 
       {/* Main Content */}
       <main id="main-content" className={currentPage === 'home' ? '' : 'py-8'}>
+        <Suspense fallback={<PageSpinner />}>
         {currentPage === 'home' && (
           <div key="home" className="animate-fade-in">
             <ModuleSelector userId={user.uid} userGrade={userProfile?.grade} userProfile={userProfile} onXPUpdate={handleXPUpdate} />
@@ -294,6 +325,16 @@ function App() {
             />
           </div>
         )}
+        {currentPage === 'parent' && (
+          <div key="parent" className="animate-fade-in">
+            <ParentDashboard
+              userId={user.uid}
+              userProfile={userProfile}
+              onBack={() => setCurrentPage('home')}
+            />
+          </div>
+        )}
+        </Suspense>
       </main>
 
       {/* Footer */}
