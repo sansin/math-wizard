@@ -2,7 +2,7 @@
   "name": "math-wizard",
   "version": "1.0.0",
   "private": true,
-  "homepage": "https://YOUR_USERNAME.github.io/math-wizard",
+  "homepage": "https://sansin.github.io/math-wizard",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
