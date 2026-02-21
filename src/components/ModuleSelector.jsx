@@ -102,10 +102,10 @@ export default function ModuleSelector({ userId, userGrade, userProfile, onXPUpd
                     onClick={() => { setSelectedGrade(grade); setSelectedModules([]); }}
                     aria-label={`Select ${info.name}`}
                     aria-pressed={isSelected}
-                    className={`p-2 rounded-lg border-2 text-left transition flex flex-col ${
+                    className={`p-2 rounded-lg border-2 text-left transition-all duration-200 flex flex-col ${
                       isSelected
                         ? `bg-gradient-to-r ${info.color} text-white border-2 border-white shadow-lg`
-                        : 'bg-gray-50 border-gray-300 hover:border-gray-400'
+                        : 'bg-gray-50 border-gray-300 hover:border-gray-400 hover:shadow-md hover:-translate-y-0.5'
                     }`}
                   >
                     <div className="text-2xl sm:text-3xl lg:text-4xl mb-1">{info.icon}</div>
@@ -198,10 +198,10 @@ export default function ModuleSelector({ userId, userGrade, userProfile, onXPUpd
                     onClick={() => toggleModule(module.name)}
                     aria-label={`${isSelected ? 'Deselect' : 'Select'} ${module.name} module`}
                     aria-pressed={isSelected}
-                    className={`p-2 rounded-lg border-2 text-left transition flex flex-col ${
+                    className={`p-2 rounded-lg border-2 text-left transition-all duration-200 flex flex-col ${
                       isSelected
                         ? `bg-gradient-to-r ${color} text-white border-white shadow-lg`
-                        : 'bg-gray-50 border-gray-300 hover:border-gray-400'
+                        : 'bg-gray-50 border-gray-300 hover:border-gray-400 hover:shadow-md hover:-translate-y-0.5'
                     }`}
                   >
                     <div className="text-xl sm:text-2xl mb-1">{isSelected ? '✅' : icon}</div>
@@ -217,9 +217,9 @@ export default function ModuleSelector({ userId, userGrade, userProfile, onXPUpd
             </div>
 
             {selectedModules.length === 0 && (
-              <p className="text-xs text-red-600 font-semibold mb-2 flex-shrink-0">
-                ⚠️ Select at least one module
-              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-2 flex-shrink-0 text-center">
+                <p className="text-sm text-blue-700 font-semibold">👆 Tap modules above to get started!</p>
+              </div>
             )}
 
             {/* Start Buttons */}

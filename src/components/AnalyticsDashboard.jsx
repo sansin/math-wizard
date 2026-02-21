@@ -70,8 +70,48 @@ export default function AnalyticsDashboard({ userId }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-violet-50 flex items-center justify-center">
-        <p className="text-2xl sm:text-3xl font-bold text-violet-600">Loading your progress... 📊</p>
+      <div className="min-h-screen bg-violet-50 p-4 sm:p-6">
+        <div className="max-w-6xl mx-auto">
+          {/* Skeleton: Header */}
+          <div className="text-center mb-8">
+            <div className="skeleton h-9 w-56 mx-auto mb-3 rounded" />
+            <div className="skeleton h-5 w-40 mx-auto rounded" />
+          </div>
+          {/* Skeleton: Level & Daily Goal */}
+          <div className="grid sm:grid-cols-2 gap-4 mb-8">
+            <div className="bg-white rounded-xl p-5 shadow-lg">
+              <div className="skeleton h-5 w-20 mb-2 rounded" />
+              <div className="skeleton h-7 w-32 mb-3 rounded" />
+              <div className="skeleton h-3 w-full rounded-full" />
+            </div>
+            <div className="bg-white rounded-xl p-5 shadow-lg">
+              <div className="skeleton h-5 w-24 mb-2 rounded" />
+              <div className="skeleton h-7 w-36 mb-3 rounded" />
+              <div className="skeleton h-3 w-full rounded-full" />
+            </div>
+          </div>
+          {/* Skeleton: KPI Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="bg-white rounded-lg p-6 shadow-lg">
+                <div className="skeleton h-4 w-24 mb-3 rounded" />
+                <div className="skeleton h-10 w-16 mb-2 rounded" />
+                <div className="skeleton h-3 w-20 rounded" />
+              </div>
+            ))}
+          </div>
+          {/* Skeleton: Charts */}
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <div className="bg-white rounded-lg p-6 shadow-lg">
+              <div className="skeleton h-6 w-36 mb-4 rounded" />
+              <div className="skeleton h-80 w-full rounded" />
+            </div>
+            <div className="bg-white rounded-lg p-6 shadow-lg">
+              <div className="skeleton h-6 w-36 mb-4 rounded" />
+              <div className="skeleton h-80 w-full rounded" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -258,10 +298,10 @@ export default function AnalyticsDashboard({ userId }) {
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-lg p-6 shadow-lg flex items-center justify-center">
-              <p className="text-gray-500 text-center">
-                Start solving questions to see your topic breakdown!
-              </p>
+            <div className="bg-white rounded-lg p-8 shadow-lg flex flex-col items-center justify-center text-center">
+              <div className="text-5xl mb-3">📊</div>
+              <p className="text-lg font-bold text-gray-700 mb-1">No topic data yet!</p>
+              <p className="text-sm text-gray-500">Answer some questions and your charts will appear here.</p>
             </div>
           )}
         </div>
@@ -309,9 +349,11 @@ export default function AnalyticsDashboard({ userId }) {
               })}
             </ul>
           ) : (
-            <p className="text-gray-500 text-center py-6">
-              No data yet. Start playing to see your progress!
-            </p>
+            <div className="text-center py-8">
+              <div className="text-5xl mb-3">🧙</div>
+              <p className="text-lg font-bold text-gray-700 mb-1">No progress data yet!</p>
+              <p className="text-sm text-gray-500">Start practicing and your focus areas will show up here.</p>
+            </div>
           )}
         </div>
 

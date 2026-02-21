@@ -50,6 +50,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
   const [showSummary, setShowSummary] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [showPlaySummary, setShowPlaySummary] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const timerRef = useRef(null);
 
   // Phase 2: Engagement state
@@ -135,6 +136,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
 
   const loadQuestion = async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       // Get user history for adaptive questions
       const history = mode === 'play' ? await getUserAnswerHistory(userId) : [];
@@ -162,7 +164,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
       setCorrectAnswer(answer);
     } catch (error) {
       console.error('Error loading question:', error);
-      setQuestion('Unable to load question. Please try again.');
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -672,12 +674,18 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
     setCurrentStreak(newStreak);
     
     if (correct) {
-      setFeedback('🎉 Correct! Amazing!');
+      // Varied success messages for delight
+      const successMessages = ['🎉 Correct! Amazing!', '🌟 Nailed it!', '🔥 You\'re on fire!', '💪 Brilliant!', '⚡ Super fast!', '🧠 Big brain move!'];
+      const streakMessages = ['🔥 Unstoppable streak!', '💥 On a roll!', '🚀 Can\'t be stopped!'];
+      const msg = newStreak >= 3
+        ? `${streakMessages[newStreak % streakMessages.length]} (${newStreak} in a row!)`
+        : successMessages[Math.floor(Math.random() * successMessages.length)];
+      setFeedback(msg);
       setShowCelebration(true);
       setTimeout(() => setShowCelebration(false), 2000);
     } else {
       const explanation = getExplanation(operation, question, correctAnswer);
-      setFeedback(`❌ Not quite. The answer is ${correctAnswer}.\n${explanation}`);
+      setFeedback(`❌ Not quite.\n${correctAnswer}\n${explanation}`);
     }
 
     // Update session statistics
@@ -1000,8 +1008,51 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
 
   if (loading) {
     return (
-      <div className="max-w-xl mx-auto bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-6 shadow-lg animate-pulse h-96 flex items-center justify-center">
-        <p className="text-2xl font-bold text-violet-600">Loading question... 🤔</p>
+      <div className="max-w-xl mx-auto bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-6 shadow-lg">
+        {/* Skeleton: header */}
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex gap-2">
+            <div className="skeleton h-6 w-28 rounded-full" />
+            <div className="skeleton h-6 w-20 rounded-full" />
+          </div>
+          <div className="skeleton h-9 w-24 rounded-lg" />
+        </div>
+        {/* Skeleton: question counter */}
+        <div className="skeleton h-5 w-48 mx-auto mb-3 rounded" />
+        {/* Skeleton: question box */}
+        <div className="bg-white rounded-lg p-4 mb-4 border-2 border-gray-200">
+          <div className="skeleton h-6 w-full mb-2 rounded" />
+          <div className="skeleton h-6 w-3/4 mx-auto rounded" />
+        </div>
+        {/* Skeleton: input */}
+        <div className="skeleton h-12 w-full mb-4 rounded-lg" />
+        {/* Skeleton: button */}
+        <div className="skeleton h-12 w-full rounded-lg" />
+      </div>
+    );
+  }
+
+  // Error state with retry
+  if (loadError) {
+    return (
+      <div className="max-w-xl mx-auto bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-8 shadow-lg text-center">
+        <div className="text-5xl mb-4">😅</div>
+        <h2 className="text-xl font-bold text-gray-800 mb-2">Oops! Couldn't load the question</h2>
+        <p className="text-gray-600 mb-6">Don't worry — just try again or head back to modules.</p>
+        <div className="flex gap-3 justify-center">
+          <button
+            onClick={loadQuestion}
+            className="px-6 py-3 min-h-[44px] bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold rounded-lg hover:shadow-lg transform hover:scale-105 transition"
+          >
+            🔄 Try Again
+          </button>
+          <button
+            onClick={onEndSession}
+            className="px-6 py-3 min-h-[44px] bg-gray-200 text-gray-700 font-bold rounded-lg hover:bg-gray-300 transition"
+          >
+            ← Back to Modules
+          </button>
+        </div>
       </div>
     );
   }
@@ -1060,7 +1111,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
       </div>
 
       {/* Question */}
-      <div className="bg-white rounded-lg p-4 mb-4 border-2 border-violet-300">
+      <div className={`bg-white rounded-lg p-4 mb-4 border-2 border-violet-300 ${isCorrect === false ? 'animate-shake' : ''}`}>
         <h2 className="text-xl font-bold text-gray-800 text-center">{question}</h2>
       </div>
 
@@ -1108,22 +1159,29 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
         </button>
       </form>
 
-      {/* Celebration Animation */}
+      {/* Celebration Animation — confetti with horizontal spread */}
       {showCelebration && (
         <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute animate-confetti text-2xl"
-              style={{
-                left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 0.5}s`,
-                animationDuration: `${1.5 + Math.random()}s`,
-              }}
-            >
-              {['⭐', '🌟', '🎉', '🎊', '💫', '✨'][i % 6]}
-            </div>
-          ))}
+          {/* Brief screen flash */}
+          <div className="absolute inset-0 bg-white animate-correct-flash" />
+          {[...Array(currentStreak >= 5 ? 40 : currentStreak >= 3 ? 30 : 20)].map((_, i) => {
+            const sizes = ['text-lg', 'text-2xl', 'text-3xl'];
+            const drift = Math.round((Math.random() - 0.5) * 200);
+            return (
+              <div
+                key={i}
+                className={`absolute animate-confetti ${sizes[i % 3]}`}
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  '--x-drift': `${drift}px`,
+                  animationDelay: `${Math.random() * 0.5}s`,
+                  animationDuration: `${1.5 + Math.random()}s`,
+                }}
+              >
+                {['⭐', '🌟', '🎉', '🎊', '💫', '✨'][i % 6]}
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -1159,14 +1217,18 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
         <div className={`mt-4 p-4 rounded-lg font-bold animate-slide-in ${
           isCorrect 
             ? 'bg-green-100 text-green-700 border-2 border-green-400 text-center text-lg' 
-            : 'bg-red-100 text-red-700 border-2 border-red-400'
+            : 'bg-red-50 text-red-700 border-2 border-red-400'
         }`}>
           {isCorrect ? (
             feedback
           ) : (
             <>
-              <p className="text-lg text-center">{feedback.split('\n')[0]}</p>
-              <p className="text-sm font-medium mt-2 text-red-600 opacity-80">{feedback.split('\n')[1]}</p>
+              <p className="text-center text-base mb-2">{feedback.split('\n')[0]}</p>
+              <div className="text-center py-2 px-4 bg-white rounded-lg border border-green-300 mb-2">
+                <span className="text-sm text-gray-500 block">Correct answer:</span>
+                <span className="text-2xl font-bold text-green-600">{feedback.split('\n')[1]}</span>
+              </div>
+              <p className="text-sm font-medium text-red-500 opacity-80 text-center">{feedback.split('\n')[2]}</p>
             </>
           )}
         </div>

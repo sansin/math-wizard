@@ -100,6 +100,13 @@ function App() {
   // Main app
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Skip to content — accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:bg-white focus:text-violet-700 focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:font-bold"
+      >
+        Skip to content
+      </a>
       {/* Navigation Bar */}
       <nav className="bg-gradient-to-r from-violet-600 to-purple-700 text-white shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
@@ -139,33 +146,33 @@ function App() {
             <div className="hidden md:flex items-center space-x-3">
               <button
                 onClick={() => setCurrentPage('home')}
-                className={`px-4 py-2 rounded-lg font-semibold transition ${
+                className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
                   currentPage === 'home'
                     ? 'bg-white text-violet-700 shadow-lg'
                     : 'hover:bg-white hover:bg-opacity-20'
                 }`}
               >
-                🎮 Play
+                <span aria-hidden="true">🎮</span> Play
               </button>
               <button
                 onClick={() => setCurrentPage('analytics')}
-                className={`px-4 py-2 rounded-lg font-semibold transition ${
+                className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
                   currentPage === 'analytics'
                     ? 'bg-white text-violet-700 shadow-lg'
                     : 'hover:bg-white hover:bg-opacity-20'
                 }`}
               >
-                📊 Progress
+                <span aria-hidden="true">📊</span> Progress
               </button>
               <button
                 onClick={() => setCurrentPage('settings')}
-                className={`px-4 py-2 rounded-lg font-semibold transition ${
+                className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
                   currentPage === 'settings'
                     ? 'bg-white text-violet-700 shadow-lg'
                     : 'hover:bg-white hover:bg-opacity-20'
                 }`}
               >
-                ⚙️ Settings
+                <span aria-hidden="true">⚙️</span> Settings
               </button>
               <button
                 onClick={handleLogout}
@@ -195,7 +202,7 @@ function App() {
 
           {/* Mobile Menu - slides down when open */}
           {menuOpen && (
-            <div className="md:hidden mt-3 pt-3 border-t border-white border-opacity-30 space-y-2">
+            <div className="md:hidden mt-3 pt-3 border-t border-white border-opacity-30 space-y-2 animate-slide-down">
               <div className="text-center mb-2">
                 <p className="text-sm opacity-90">
                   {userProfile?.name} • Grade {userProfile?.grade}
@@ -257,7 +264,7 @@ function App() {
       </nav>
 
       {/* Main Content */}
-      <main className={currentPage === 'home' ? '' : 'py-8'}>
+      <main id="main-content" className={currentPage === 'home' ? '' : 'py-8'}>
         {currentPage === 'home' && (
           <div key="home" className="animate-fade-in">
             <ModuleSelector userId={user.uid} userGrade={userProfile?.grade} userProfile={userProfile} onXPUpdate={handleXPUpdate} />
