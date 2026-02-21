@@ -21,7 +21,7 @@ export const saveUserProfile = async (userId, userData) => {
       totalQuestions: 0,
       accuracy: 0,
       preferredOperations: getDefaultOperations(userData.grade),
-    });
+    }, { merge: true });
     return true;
   } catch (error) {
     console.error('Error saving user profile:', error);

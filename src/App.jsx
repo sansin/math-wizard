@@ -122,7 +122,7 @@ function App() {
 
             {/* User Info + XP Bar - hidden on mobile */}
             <div className="hidden md:flex flex-col items-center gap-1">
-              <p className="font-semibold text-sm">{userProfile?.name} • Grade {userProfile?.grade}</p>
+              <p className="font-semibold text-sm max-w-[200px] truncate">{userProfile?.name} • Grade {userProfile?.grade}</p>
               <div className="flex items-center gap-2 text-xs">
                 <span className="font-bold text-amber-300">⚡ Lv.{getLevelForXP(xpData.totalXP)}</span>
                 <div className="w-24 h-2 bg-white bg-opacity-30 rounded-full overflow-hidden">
@@ -200,9 +200,18 @@ function App() {
             </button>
           </div>
 
+          {/* Mobile menu backdrop — closes menu on outside tap */}
+          {menuOpen && (
+            <div
+              className="fixed inset-0 z-40 md:hidden"
+              onClick={() => setMenuOpen(false)}
+              aria-hidden="true"
+            />
+          )}
+
           {/* Mobile Menu - slides down when open */}
           {menuOpen && (
-            <div className="md:hidden mt-3 pt-3 border-t border-white border-opacity-30 space-y-2 animate-slide-down">
+            <div className="md:hidden mt-3 pt-3 border-t border-white border-opacity-30 space-y-2 animate-slide-down relative z-50">
               <div className="text-center mb-2">
                 <p className="text-sm opacity-90">
                   {userProfile?.name} • Grade {userProfile?.grade}

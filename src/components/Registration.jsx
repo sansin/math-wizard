@@ -78,6 +78,9 @@ export default function Registration({ onRegistrationComplete }) {
       if (!form.name || !form.age || !form.grade) {
         throw new Error('Please fill in all required fields');
       }
+      if (form.email && !form.password) {
+        throw new Error('Please enter a password to register with email, or clear the email field to continue as a guest.');
+      }
       if (form.email && form.password !== form.confirmPassword) {
         throw new Error('Passwords do not match');
       }
@@ -219,6 +222,7 @@ export default function Registration({ onRegistrationComplete }) {
                 placeholder="Enter your name"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
+                maxLength={25}
                 className="w-full p-3 border-2 border-violet-300 rounded-lg focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200 transition"
                 required
               />

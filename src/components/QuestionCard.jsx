@@ -61,6 +61,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
   const [newLevelInfo, setNewLevelInfo] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const autoAdvanceRef = useRef(null);
+  const historyRef = useRef(null);
 
   useEffect(() => {
     loadQuestion();
@@ -138,8 +139,14 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
     setLoading(true);
     setLoadError(false);
     try {
-      // Get user history for adaptive questions
-      const history = mode === 'play' ? await getUserAnswerHistory(userId) : [];
+      // Get user history for adaptive questions (cached per session)
+      let history = [];
+      if (mode === 'play') {
+        if (!historyRef.current) {
+          historyRef.current = await getUserAnswerHistory(userId);
+        }
+        history = historyRef.current;
+      }
       
       // Get available operations from selected modules
       const availableOps = getOperationsFromModules();
@@ -885,7 +892,8 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
     const emoji = pct >= 80 ? '🌟' : pct >= 60 ? '👍' : pct >= 40 ? '💪' : '📚';
 
     return (
-      <div className="max-w-lg mx-auto bg-white rounded-2xl p-6 shadow-xl animate-fade-in">
+      <div className="min-h-[calc(100vh-120px)] flex items-center justify-center p-4">
+      <div className="max-w-lg w-full bg-white rounded-2xl p-6 shadow-xl animate-fade-in">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold text-gray-800 mb-2">{emoji} Session Complete!</h2>
           <p className="text-gray-500">Great practice session — here's your recap</p>
@@ -938,6 +946,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
           ← Back to Modules
         </button>
       </div>
+      </div>
     );
   }
 
@@ -948,7 +957,8 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
     const gradeColor = pct >= 80 ? 'text-green-600' : pct >= 60 ? 'text-yellow-600' : 'text-red-600';
 
     return (
-      <div className="max-w-lg mx-auto bg-white rounded-2xl p-6 shadow-xl animate-fade-in">
+      <div className="min-h-[calc(100vh-120px)] flex items-center justify-center p-4">
+      <div className="max-w-lg w-full bg-white rounded-2xl p-6 shadow-xl animate-fade-in">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold text-gray-800 mb-2">📝 Test Complete!</h2>
           <p className="text-gray-500">Here's how you did</p>
@@ -1002,6 +1012,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
         >
           ← Back to Modules
         </button>
+      </div>
       </div>
     );
   }
@@ -1084,7 +1095,9 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
         <button
           onClick={() => {
             if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
-            if (mode === 'play' && sessionStats.total > 0) {
+            const hasProgress = sessionStats.total > 0;
+            if (hasProgress && !window.confirm('End this session? Your progress will be saved.')) return;
+            if (mode === 'play' && hasProgress) {
               setShowPlaySummary(true);
             } else {
               onEndSession();
@@ -1214,7 +1227,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
 
       {/* Feedback */}
       {feedback && (
-        <div className={`mt-4 p-4 rounded-lg font-bold animate-slide-in ${
+        <div aria-live="assertive" role="alert" className={`mt-4 p-4 rounded-lg font-bold animate-slide-in ${
           isCorrect 
             ? 'bg-green-100 text-green-700 border-2 border-green-400 text-center text-lg' 
             : 'bg-red-50 text-red-700 border-2 border-red-400'

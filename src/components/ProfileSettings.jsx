@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { auth, db } from '../firebaseConfig';
 import { updateDoc, doc } from 'firebase/firestore';
 import { updatePassword } from 'firebase/auth';
@@ -14,6 +14,14 @@ export default function ProfileSettings({ userId, userProfile, onBack, onProfile
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const navTimerRef = useRef(null);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (navTimerRef.current) clearTimeout(navTimerRef.current);
+    };
+  }, []);
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
@@ -30,25 +38,39 @@ export default function ProfileSettings({ userId, userProfile, onBack, onProfile
       });
 
       // Update password if provided
-      if (newPassword && newPassword === confirmPassword) {
-        await updatePassword(auth.currentUser, newPassword);
-        setNewPassword('');
-        setConfirmPassword('');
-      } else if (newPassword || confirmPassword) {
-        setMessage('❌ Passwords do not match');
-        setLoading(false);
-        return;
+      if (newPassword || confirmPassword) {
+        if (newPassword !== confirmPassword) {
+          setMessage('❌ Passwords do not match');
+          setLoading(false);
+          return;
+        }
+        if (newPassword.length < 6) {
+          setMessage('❌ Password must be at least 6 characters');
+          setLoading(false);
+          return;
+        }
+        try {
+          await updatePassword(auth.currentUser, newPassword);
+          setNewPassword('');
+          setConfirmPassword('');
+        } catch (pwError) {
+          if (pwError.code === 'auth/requires-recent-login') {
+            setMessage('❌ For security, please log out and log back in before changing your password.');
+          } else {
+            setMessage(`❌ Password error: ${pwError.message}`);
+          }
+          setLoading(false);
+          return;
+        }
       }
 
       setMessage('✅ Profile updated successfully!');
       setEditMode(false);
       if (onProfileUpdated) await onProfileUpdated();
       // Navigate back after a short delay so user sees the success message
-      const timer = setTimeout(() => {
+      navTimerRef.current = setTimeout(() => {
         onBack();
       }, 1500);
-      // Return cleanup in case component unmounts before timeout fires
-      return () => clearTimeout(timer);
     } catch (error) {
       setMessage(`❌ Error: ${error.message}`);
     } finally {
@@ -123,6 +145,7 @@ export default function ProfileSettings({ userId, userProfile, onBack, onProfile
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  maxLength={25}
                   className="w-full p-3 border-2 border-violet-300 rounded-lg focus:outline-none focus:border-violet-600"
                   required
                 />
