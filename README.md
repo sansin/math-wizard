@@ -2,6 +2,8 @@
 
 ![Math Wizard Badge](https://img.shields.io/badge/Math%20Wizard-AI%20Learning-FFD700?style=for-the-badge)
 
+**🌐 Live App: [https://sansin.github.io/math-wizard/](https://sansin.github.io/math-wizard/)**
+
 ## 📚 Overview
 
 Math Wizard is a **web-based, AI-driven adaptive math learning platform** designed for kids aged 4-18. It combines personalized question generation, real-time progress tracking, and gamified learning to make math engaging and effective.
