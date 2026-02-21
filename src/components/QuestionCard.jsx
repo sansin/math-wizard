@@ -203,11 +203,12 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
       if (question.includes('3x = 21')) return 7;
       if (question.includes('x + 8 = 15')) return 7;
       // Try to solve algebraic equations from AI-generated questions
-      // Pattern: "If Ax + B = C, what is x?" -> x = (C - B) / A
-      const algebraPattern = /(\d+)x\s*([+-])\s*(\d+)\s*=\s*(\d+)/;
+      // Pattern: "Ax + B = C" or "Ax - B = C" where A may be implicit (1)
+      // Also handles "x + B = C" and "x - B = C"
+      const algebraPattern = /(\d*)x\s*([+-])\s*(\d+)\s*=\s*(\d+)/;
       const algebraMatch = question.match(algebraPattern);
       if (algebraMatch) {
-        const A = parseInt(algebraMatch[1]);
+        const A = algebraMatch[1] ? parseInt(algebraMatch[1]) : 1;
         const op2 = algebraMatch[2];
         const B = parseInt(algebraMatch[3]);
         const C = parseInt(algebraMatch[4]);
@@ -216,6 +217,14 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
         } else if (op2 === '-') {
           return (C + B) / A;
         }
+      }
+      // Pattern: "Ax = C" (no +/- term)
+      const simpleAlgebra = /(\d*)x\s*=\s*(\d+)/;
+      const simpleMatch = question.match(simpleAlgebra);
+      if (simpleMatch) {
+        const A = simpleMatch[1] ? parseInt(simpleMatch[1]) : 1;
+        const C = parseInt(simpleMatch[2]);
+        return C / A;
       }
       // Extract numbers for simple algebra
       const numbers = question.match(/\d+/g);
