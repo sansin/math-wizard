@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/math-wizard/static/css/main.4d8d260c.css",
-    "main.js": "/math-wizard/static/js/main.c8719911.js",
+    "main.js": "/math-wizard/static/js/main.bfda6275.js",
     "index.html": "/math-wizard/index.html",
     "main.4d8d260c.css.map": "/math-wizard/static/css/main.4d8d260c.css.map",
-    "main.c8719911.js.map": "/math-wizard/static/js/main.c8719911.js.map"
+    "main.bfda6275.js.map": "/math-wizard/static/js/main.bfda6275.js.map"
   },
   "entrypoints": [
     "static/css/main.4d8d260c.css",
-    "static/js/main.c8719911.js"
+    "static/js/main.bfda6275.js"
   ]
 }
