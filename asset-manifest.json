@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "/math-wizard/static/css/main.e3c18fa9.css",
-    "main.js": "/math-wizard/static/js/main.1e455af6.js",
-    "static/js/131.4a0d4395.chunk.js": "/math-wizard/static/js/131.4a0d4395.chunk.js",
+    "main.css": "/math-wizard/static/css/main.00917396.css",
+    "main.js": "/math-wizard/static/js/main.acdf4c00.js",
+    "static/js/479.50cc6fac.chunk.js": "/math-wizard/static/js/479.50cc6fac.chunk.js",
     "static/js/11.8a4f2321.chunk.js": "/math-wizard/static/js/11.8a4f2321.chunk.js",
     "static/js/347.cecb34f6.chunk.js": "/math-wizard/static/js/347.cecb34f6.chunk.js",
     "static/js/59.75a044ee.chunk.js": "/math-wizard/static/js/59.75a044ee.chunk.js",
     "static/js/188.288f40ed.chunk.js": "/math-wizard/static/js/188.288f40ed.chunk.js",
     "static/js/722.60bc0691.chunk.js": "/math-wizard/static/js/722.60bc0691.chunk.js",
     "index.html": "/math-wizard/index.html",
-    "main.e3c18fa9.css.map": "/math-wizard/static/css/main.e3c18fa9.css.map",
-    "main.1e455af6.js.map": "/math-wizard/static/js/main.1e455af6.js.map",
-    "131.4a0d4395.chunk.js.map": "/math-wizard/static/js/131.4a0d4395.chunk.js.map",
+    "main.00917396.css.map": "/math-wizard/static/css/main.00917396.css.map",
+    "main.acdf4c00.js.map": "/math-wizard/static/js/main.acdf4c00.js.map",
+    "479.50cc6fac.chunk.js.map": "/math-wizard/static/js/479.50cc6fac.chunk.js.map",
     "11.8a4f2321.chunk.js.map": "/math-wizard/static/js/11.8a4f2321.chunk.js.map",
     "347.cecb34f6.chunk.js.map": "/math-wizard/static/js/347.cecb34f6.chunk.js.map",
     "59.75a044ee.chunk.js.map": "/math-wizard/static/js/59.75a044ee.chunk.js.map",
@@ -19,7 +19,7 @@
     "722.60bc0691.chunk.js.map": "/math-wizard/static/js/722.60bc0691.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.e3c18fa9.css",
-    "static/js/main.1e455af6.js"
+    "static/css/main.00917396.css",
+    "static/js/main.acdf4c00.js"
   ]
 }
