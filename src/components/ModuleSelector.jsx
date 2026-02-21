@@ -72,20 +72,20 @@ export default function ModuleSelector({ userId, userGrade, userProfile }) {
   };
 
   return (
-    <div className="h-[calc(100vh-52px)] bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 p-2 overflow-hidden flex flex-col">
+    <div className="min-h-[calc(100vh-52px)] bg-violet-50 p-2 sm:p-4 flex flex-col">
       <div className="max-w-7xl mx-auto w-full flex flex-col h-full">
         {/* Header */}
         <div className="text-center mb-2 flex-shrink-0">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-0.5 drop-shadow-lg">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-0.5">
             📚 Choose Your Modules
           </h1>
-          <p className="text-xs sm:text-sm lg:text-base text-white opacity-90 drop-shadow">
+          <p className="text-xs sm:text-sm lg:text-base text-gray-600">
             Hi {userProfile?.name}! Select a grade & modules 👋
           </p>
         </div>
 
         {/* Grade + Modules on one page */}
-        <div className="flex flex-col flex-1 gap-2 overflow-hidden">
+        <div className="flex flex-col flex-1 gap-2">
           {/* Grades Section */}
           <div className="bg-white rounded-xl p-2 shadow-lg flex-shrink-0">
             <h3 className="text-sm sm:text-base lg:text-lg font-bold text-gray-800 mb-2">
@@ -137,13 +137,13 @@ export default function ModuleSelector({ userId, userGrade, userProfile }) {
               <div className="flex gap-1">
                 <button
                   onClick={selectAllModules}
-                  className="px-2 py-1 text-xs sm:text-sm bg-green-500 text-white font-semibold rounded hover:bg-green-600 transition"
+                  className="px-3 py-2 min-h-[44px] text-xs sm:text-sm bg-emerald-500 text-white font-semibold rounded-lg hover:bg-emerald-600 transition"
                 >
                   ✅ All
                 </button>
                 <button
                   onClick={clearAllModules}
-                  className="px-2 py-1 text-xs sm:text-sm bg-red-500 text-white font-semibold rounded hover:bg-red-600 transition"
+                  className="px-3 py-2 min-h-[44px] text-xs sm:text-sm bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition"
                 >
                   ❌ Clear
                 </button>
@@ -151,7 +151,7 @@ export default function ModuleSelector({ userId, userGrade, userProfile }) {
             </div>
 
             {/* Module Cards Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2 overflow-y-auto flex-1 mb-2 content-start">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2 overflow-y-auto flex-1 mb-2 content-start max-h-[40vh] sm:max-h-[50vh]">
               {currentGradeModules.map((module, index) => {
                 const isSelected = selectedModules.includes(module.name);
                 const moduleColors = [
@@ -205,14 +205,14 @@ export default function ModuleSelector({ userId, userGrade, userProfile }) {
               <button
                 onClick={() => selectedModules.length > 0 && setMode('play')}
                 disabled={selectedModules.length === 0}
-                className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold py-2 rounded-lg hover:shadow-lg transform hover:scale-105 transition disabled:opacity-50 text-xs sm:text-sm"
+                className="bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold py-3 min-h-[44px] rounded-lg hover:shadow-lg transform hover:scale-105 transition disabled:opacity-50 text-xs sm:text-sm"
               >
                 🎯 Play Mode
               </button>
               <button
                 onClick={() => selectedModules.length > 0 && setMode('test')}
                 disabled={selectedModules.length === 0}
-                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-2 rounded-lg hover:shadow-lg transform hover:scale-105 transition disabled:opacity-50 text-xs sm:text-sm"
+                className="bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold py-3 min-h-[44px] rounded-lg hover:shadow-lg transform hover:scale-105 transition disabled:opacity-50 text-xs sm:text-sm"
               >
                 📝 Test Mode
               </button>

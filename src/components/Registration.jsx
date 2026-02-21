@@ -116,10 +116,10 @@ export default function Registration({ onRegistrationComplete }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-300 via-orange-300 to-pink-300 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-violet-100 via-purple-50 to-amber-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-pink-600 mb-2">
+          <h1 className="text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-purple-500 mb-2">
             🧙 Math Wizard
           </h1>
           <p className="text-gray-600 text-sm">Learn math the fun way with AI!</p>
@@ -129,14 +129,14 @@ export default function Registration({ onRegistrationComplete }) {
             <button
               type="button"
               onClick={() => { setIsLoginMode(false); setError(''); }}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition ${!isLoginMode ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition ${!isLoginMode ? 'bg-white shadow text-violet-600' : 'text-gray-500 hover:text-gray-700'}`}
             >
               Register
             </button>
             <button
               type="button"
               onClick={() => { setIsLoginMode(true); setError(''); }}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition ${isLoginMode ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition ${isLoginMode ? 'bg-white shadow text-violet-600' : 'text-gray-500 hover:text-gray-700'}`}
             >
               Login
             </button>
@@ -153,7 +153,7 @@ export default function Registration({ onRegistrationComplete }) {
                 placeholder="your@email.com"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full p-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
+                className="w-full p-3 border-2 border-violet-300 rounded-lg focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200 transition"
                 required
               />
             </div>
@@ -165,7 +165,7 @@ export default function Registration({ onRegistrationComplete }) {
                 placeholder="Enter your password"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="w-full p-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
+                className="w-full p-3 border-2 border-violet-300 rounded-lg focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200 transition"
                 required
               />
             </div>
@@ -175,7 +175,7 @@ export default function Registration({ onRegistrationComplete }) {
                 type="button"
                 onClick={handleForgotPassword}
                 disabled={loading}
-                className="text-sm text-blue-600 hover:underline font-medium"
+                className="text-sm text-violet-600 hover:underline font-medium"
               >
                 Forgot Password?
               </button>
@@ -196,14 +196,14 @@ export default function Registration({ onRegistrationComplete }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-400 to-blue-600 text-white font-bold py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition disabled:opacity-50"
+              className="w-full bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition disabled:opacity-50"
             >
               {loading ? 'Logging in...' : '🔑 Log In'}
             </button>
 
             <p className="text-center text-sm text-gray-500">
               Don't have an account?{' '}
-              <button type="button" onClick={() => { setIsLoginMode(false); setError(''); setResetSent(false); }} className="text-blue-600 font-semibold hover:underline">
+              <button type="button" onClick={() => { setIsLoginMode(false); setError(''); setResetSent(false); }} className="text-violet-600 font-semibold hover:underline">
                 Register here
               </button>
             </p>
@@ -219,7 +219,7 @@ export default function Registration({ onRegistrationComplete }) {
                 placeholder="Enter your name"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full p-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
+                className="w-full p-3 border-2 border-violet-300 rounded-lg focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200 transition"
                 required
               />
             </div>
@@ -233,7 +233,7 @@ export default function Registration({ onRegistrationComplete }) {
                   placeholder="Age"
                   value={form.age}
                   onChange={(e) => setForm({ ...form, age: e.target.value })}
-                  className="w-full p-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
+                  className="w-full p-3 border-2 border-violet-300 rounded-lg focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200 transition"
                   min="4"
                   max="18"
                   required
@@ -246,7 +246,7 @@ export default function Registration({ onRegistrationComplete }) {
                 <select
                   value={form.grade}
                   onChange={(e) => setForm({ ...form, grade: e.target.value })}
-                  className="w-full p-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
+                  className="w-full p-3 border-2 border-violet-300 rounded-lg focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200 transition"
                   required
                 >
                   <option value="">Select</option>
@@ -269,7 +269,7 @@ export default function Registration({ onRegistrationComplete }) {
                     placeholder="your@email.com"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className="w-full p-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
+                    className="w-full p-3 border-2 border-violet-300 rounded-lg focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200 transition"
                   />
                 </div>
 
@@ -283,7 +283,7 @@ export default function Registration({ onRegistrationComplete }) {
                         placeholder="At least 6 characters"
                         value={form.password}
                         onChange={(e) => setForm({ ...form, password: e.target.value })}
-                        className="w-full p-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
+                        className="w-full p-3 border-2 border-violet-300 rounded-lg focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200 transition"
                         required
                       />
                     </div>
@@ -295,7 +295,7 @@ export default function Registration({ onRegistrationComplete }) {
                         placeholder="Confirm password"
                         value={form.confirmPassword}
                         onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
-                        className="w-full p-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
+                        className="w-full p-3 border-2 border-violet-300 rounded-lg focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200 transition"
                         required
                       />
                     </div>
@@ -316,7 +316,7 @@ export default function Registration({ onRegistrationComplete }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition disabled:opacity-50"
               >
                 {loading ? 'Creating Account...' : '🚀 Start Learning!'}
               </button>
@@ -334,7 +334,7 @@ export default function Registration({ onRegistrationComplete }) {
 
             <p className="text-center text-sm text-gray-500">
               Already have an account?{' '}
-              <button type="button" onClick={() => { setIsLoginMode(true); setError(''); }} className="text-blue-600 font-semibold hover:underline">
+              <button type="button" onClick={() => { setIsLoginMode(true); setError(''); }} className="text-violet-600 font-semibold hover:underline">
                 Log in here
               </button>
             </p>

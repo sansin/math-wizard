@@ -62,10 +62,10 @@ function App() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-300 via-orange-300 to-pink-400">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-500 to-purple-600">
         <div className="text-center">
           <div className="text-6xl mb-4 animate-bounce">🧙</div>
-          <p className="text-3xl font-bold text-white">Loading Math Wizard...</p>
+          <p className="text-2xl sm:text-3xl font-bold text-white">Loading Math Wizard...</p>
         </div>
       </div>
     );
@@ -80,7 +80,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation Bar */}
-      <nav className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white shadow-lg sticky top-0 z-50">
+      <nav className="bg-gradient-to-r from-violet-600 to-purple-700 text-white shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex justify-between items-center">
             {/* Logo - Click to go home */}
@@ -104,7 +104,7 @@ function App() {
                 onClick={() => setCurrentPage('home')}
                 className={`px-4 py-2 rounded-lg font-semibold transition ${
                   currentPage === 'home'
-                    ? 'bg-white text-blue-600 shadow-lg'
+                    ? 'bg-white text-violet-700 shadow-lg'
                     : 'hover:bg-white hover:bg-opacity-20'
                 }`}
               >
@@ -114,7 +114,7 @@ function App() {
                 onClick={() => setCurrentPage('analytics')}
                 className={`px-4 py-2 rounded-lg font-semibold transition ${
                   currentPage === 'analytics'
-                    ? 'bg-white text-blue-600 shadow-lg'
+                    ? 'bg-white text-violet-700 shadow-lg'
                     : 'hover:bg-white hover:bg-opacity-20'
                 }`}
               >
@@ -124,7 +124,7 @@ function App() {
                 onClick={() => setCurrentPage('settings')}
                 className={`px-4 py-2 rounded-lg font-semibold transition ${
                   currentPage === 'settings'
-                    ? 'bg-white text-blue-600 shadow-lg'
+                    ? 'bg-white text-violet-700 shadow-lg'
                     : 'hover:bg-white hover:bg-opacity-20'
                 }`}
               >
@@ -164,9 +164,9 @@ function App() {
               </p>
               <button
                 onClick={() => { setCurrentPage('home'); setMenuOpen(false); }}
-                className={`w-full text-left px-4 py-2 rounded-lg font-semibold transition ${
+                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition ${
                   currentPage === 'home'
-                    ? 'bg-white text-blue-600 shadow'
+                    ? 'bg-white text-violet-700 shadow'
                     : 'hover:bg-white hover:bg-opacity-20'
                 }`}
               >
@@ -174,9 +174,9 @@ function App() {
               </button>
               <button
                 onClick={() => { setCurrentPage('analytics'); setMenuOpen(false); }}
-                className={`w-full text-left px-4 py-2 rounded-lg font-semibold transition ${
+                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition ${
                   currentPage === 'analytics'
-                    ? 'bg-white text-blue-600 shadow'
+                    ? 'bg-white text-violet-700 shadow'
                     : 'hover:bg-white hover:bg-opacity-20'
                 }`}
               >
@@ -184,9 +184,9 @@ function App() {
               </button>
               <button
                 onClick={() => { setCurrentPage('settings'); setMenuOpen(false); }}
-                className={`w-full text-left px-4 py-2 rounded-lg font-semibold transition ${
+                className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition ${
                   currentPage === 'settings'
-                    ? 'bg-white text-blue-600 shadow'
+                    ? 'bg-white text-violet-700 shadow'
                     : 'hover:bg-white hover:bg-opacity-20'
                 }`}
               >
@@ -194,7 +194,7 @@ function App() {
               </button>
               <button
                 onClick={() => { handleLogout(); setMenuOpen(false); }}
-                className="w-full text-left px-4 py-2 rounded-lg font-semibold bg-red-600 hover:bg-red-700 transition"
+                className="w-full text-left px-4 py-3 rounded-lg font-semibold bg-red-600 hover:bg-red-700 transition"
               >
                 🚪 Logout
               </button>
@@ -206,21 +206,29 @@ function App() {
       {/* Main Content */}
       <main className={currentPage === 'home' ? '' : 'py-8'}>
         {currentPage === 'home' && (
-          <ModuleSelector userId={user.uid} userGrade={userProfile?.grade} userProfile={userProfile} />
+          <div key="home" className="animate-fade-in">
+            <ModuleSelector userId={user.uid} userGrade={userProfile?.grade} userProfile={userProfile} />
+          </div>
         )}
-        {currentPage === 'analytics' && <AnalyticsDashboard userId={user.uid} />}
+        {currentPage === 'analytics' && (
+          <div key="analytics" className="animate-fade-in">
+            <AnalyticsDashboard userId={user.uid} />
+          </div>
+        )}
         {currentPage === 'settings' && (
-          <ProfileSettings 
-            userId={user.uid} 
-            userProfile={userProfile}
-            onBack={() => setCurrentPage('home')}
-            onProfileUpdated={refreshProfile}
-          />
+          <div key="settings" className="animate-fade-in">
+            <ProfileSettings 
+              userId={user.uid} 
+              userProfile={userProfile}
+              onBack={() => setCurrentPage('home')}
+              onProfileUpdated={refreshProfile}
+            />
+          </div>
         )}
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white py-6 mt-12">
+      <footer className="bg-gray-900 text-white py-6 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-sm opacity-75">
             © 2026 Math Wizard. Made with 💙 for curious minds.

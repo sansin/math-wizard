@@ -66,8 +66,8 @@ export default function AnalyticsDashboard({ userId }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-100 to-green-100 flex items-center justify-center">
-        <p className="text-3xl font-bold text-blue-600">Loading your progress... 📊</p>
+      <div className="min-h-screen bg-violet-50 flex items-center justify-center">
+        <p className="text-2xl sm:text-3xl font-bold text-violet-600">Loading your progress... 📊</p>
       </div>
     );
   }
@@ -79,12 +79,12 @@ export default function AnalyticsDashboard({ userId }) {
     datasets: [{
       label: 'Accuracy (%)',
       data: hasChartData ? dailyAccuracy.data : [0],
-      borderColor: '#FFD700',
-      backgroundColor: 'rgba(255, 215, 0, 0.1)',
+      borderColor: '#7C3AED',
+      backgroundColor: 'rgba(124, 58, 237, 0.1)',
       tension: 0.4,
       fill: true,
       pointRadius: 6,
-      pointBackgroundColor: '#FFD700',
+      pointBackgroundColor: '#7C3AED',
       pointBorderColor: '#fff',
       pointBorderWidth: 2,
     }],
@@ -143,41 +143,41 @@ export default function AnalyticsDashboard({ userId }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-green-100 p-6">
+    <div className="min-h-screen bg-violet-50 p-4 sm:p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-blue-700 mb-2">📊 Your Progress</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">📊 Your Progress</h1>
           <p className="text-gray-600">Keep learning and improving! 🚀</p>
         </div>
 
         {/* KPI Cards */}
-        <div className="grid md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {/* Total Questions */}
-          <div className="bg-white rounded-lg p-6 shadow-lg border-l-4 border-yellow-400">
+          <div className="bg-white rounded-lg p-6 shadow-lg border-l-4 border-amber-400">
             <p className="text-gray-600 text-sm font-semibold mb-2">Total Questions</p>
-            <p className="text-4xl font-bold text-yellow-500">{stats.totalQuestions}</p>
+            <p className="text-3xl sm:text-4xl font-bold text-amber-500">{stats.totalQuestions}</p>
             <p className="text-xs text-gray-500 mt-2">questions answered</p>
           </div>
 
           {/* Accuracy */}
-          <div className="bg-white rounded-lg p-6 shadow-lg border-l-4 border-green-400">
+          <div className="bg-white rounded-lg p-6 shadow-lg border-l-4 border-emerald-400">
             <p className="text-gray-600 text-sm font-semibold mb-2">Accuracy</p>
-            <p className="text-4xl font-bold text-green-500">{stats.accuracy}%</p>
+            <p className="text-3xl sm:text-4xl font-bold text-emerald-500">{stats.accuracy}%</p>
             <p className="text-xs text-gray-500 mt-2">overall score</p>
           </div>
 
           {/* Current Streak */}
-          <div className="bg-white rounded-lg p-6 shadow-lg border-l-4 border-blue-400">
+          <div className="bg-white rounded-lg p-6 shadow-lg border-l-4 border-violet-400">
             <p className="text-gray-600 text-sm font-semibold mb-2">Current Streak 🔥</p>
-            <p className="text-4xl font-bold text-blue-500">{stats.streak}</p>
+            <p className="text-3xl sm:text-4xl font-bold text-violet-500">{stats.streak}</p>
             <p className="text-xs text-gray-500 mt-2">correct in a row</p>
           </div>
 
           {/* Topics */}
           <div className="bg-white rounded-lg p-6 shadow-lg border-l-4 border-purple-400">
             <p className="text-gray-600 text-sm font-semibold mb-2">Topics</p>
-            <p className="text-4xl font-bold text-purple-500">{stats.weakAreas.length}</p>
+            <p className="text-3xl sm:text-4xl font-bold text-purple-500">{stats.weakAreas.length}</p>
             <p className="text-xs text-gray-500 mt-2">types practiced</p>
           </div>
         </div>
@@ -259,7 +259,7 @@ export default function AnalyticsDashboard({ userId }) {
         </div>
 
         {/* Tips Section */}
-        <div className="bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg p-6 mt-8">
+        <div className="bg-gradient-to-r from-violet-50 to-purple-50 rounded-lg p-6 mt-8">
           <h3 className="text-xl font-bold text-gray-800 mb-4">💡 Tips for Success</h3>
           <ul className="grid md:grid-cols-2 gap-4 text-gray-700">
             <li className="flex items-start">

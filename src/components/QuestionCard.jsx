@@ -814,8 +814,8 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
         </div>
 
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-blue-50 rounded-xl p-4 text-center">
-            <p className="text-3xl font-bold text-blue-600">{sessionStats.total}</p>
+          <div className="bg-violet-50 rounded-xl p-4 text-center">
+            <p className="text-3xl font-bold text-violet-600">{sessionStats.total}</p>
             <p className="text-xs text-gray-500 mt-1">Questions</p>
           </div>
           <div className="bg-green-50 rounded-xl p-4 text-center">
@@ -851,7 +851,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
 
         <button
           onClick={onEndSession}
-          className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition"
+          className="w-full bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold py-3 min-h-[44px] rounded-lg hover:shadow-lg transform hover:scale-105 transition"
         >
           ← Back to Modules
         </button>
@@ -874,16 +874,16 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
 
         {/* Score Card */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-blue-50 rounded-xl p-4 text-center">
-            <p className="text-3xl font-bold text-blue-600">{sessionStats.correct}/{sessionStats.total}</p>
+          <div className="bg-violet-50 rounded-xl p-4 text-center">
+            <p className="text-3xl font-bold text-violet-600">{sessionStats.correct}/{sessionStats.total}</p>
             <p className="text-xs text-gray-500 mt-1">Correct</p>
           </div>
           <div className="bg-purple-50 rounded-xl p-4 text-center">
             <p className={`text-3xl font-bold ${gradeColor}`}>{grade}</p>
             <p className="text-xs text-gray-500 mt-1">{pct}%</p>
           </div>
-          <div className="bg-orange-50 rounded-xl p-4 text-center">
-            <p className="text-3xl font-bold text-orange-600">{formatTime(elapsedTime)}</p>
+          <div className="bg-amber-50 rounded-xl p-4 text-center">
+            <p className="text-3xl font-bold text-amber-600">{formatTime(elapsedTime)}</p>
             <p className="text-xs text-gray-500 mt-1">Time</p>
           </div>
         </div>
@@ -912,7 +912,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
 
         <button
           onClick={onEndSession}
-          className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition"
+          className="w-full bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold py-3 min-h-[44px] rounded-lg hover:shadow-lg transform hover:scale-105 transition"
         >
           ← Back to Modules
         </button>
@@ -922,19 +922,19 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
 
   if (loading) {
     return (
-      <div className="max-w-xl mx-auto bg-gradient-to-br from-yellow-100 to-blue-100 rounded-xl p-6 shadow-lg animate-pulse h-96 flex items-center justify-center">
-        <p className="text-2xl font-bold text-blue-600">Loading question... 🤔</p>
+      <div className="max-w-xl mx-auto bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-6 shadow-lg animate-pulse h-96 flex items-center justify-center">
+        <p className="text-2xl font-bold text-violet-600">Loading question... 🤔</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-xl mx-auto bg-gradient-to-br from-yellow-100 to-blue-100 rounded-xl p-6 shadow-lg">
+    <div className="max-w-xl mx-auto bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-6 shadow-lg">
       {/* Session Header with Difficulty & End Button */}
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-3">
           <div className="text-sm font-semibold text-gray-600">
-            Operation: <span className="text-blue-600 capitalize">{operation}</span>
+            Operation: <span className="text-violet-600 capitalize">{operation}</span>
           </div>
           <div className={`px-3 py-1 rounded-full text-white text-sm font-bold ${
             sessionStats.difficulty === 'Very Hard' ? 'bg-red-600' :
@@ -954,7 +954,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
               onEndSession();
             }
           }}
-          className="px-3 py-1 bg-red-500 text-white text-sm font-semibold rounded-lg hover:bg-red-600 transition"
+          className="px-4 py-2 min-h-[44px] bg-red-500 text-white text-sm font-semibold rounded-lg hover:bg-red-600 transition"
           title="End this practice/test session"
         >
           End Session
@@ -975,7 +975,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
       </div>
 
       {/* Question */}
-      <div className="bg-white rounded-lg p-4 mb-4 border-2 border-blue-300">
+      <div className="bg-white rounded-lg p-4 mb-4 border-2 border-violet-300">
         <h2 className="text-xl font-bold text-gray-800 text-center">{question}</h2>
       </div>
 
@@ -989,7 +989,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
             value={userAnswer}
             onChange={(e) => setUserAnswer(e.target.value)}
             placeholder={operation === 'logic_patterns' || operation === 'logic_patterns_problem' ? 'Enter letter (A, B, C, etc)' : 'Enter your answer (e.g. 42 or 0.5)'}
-            className="w-full p-3 border-2 border-blue-400 rounded-lg text-lg font-semibold focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition disabled:opacity-50 disabled:bg-gray-100"
+            className="w-full p-3 border-2 border-violet-400 rounded-lg text-lg font-semibold focus:outline-none focus:border-violet-600 focus:ring-2 focus:ring-violet-200 transition disabled:opacity-50 disabled:bg-gray-100"
             disabled={isCorrect !== null}
             autoFocus
           />
@@ -1000,7 +1000,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
           <button
             type="button"
             onClick={() => setShowHint(!showHint)}
-            className="text-sm text-blue-600 hover:text-blue-800 font-semibold underline"
+            className="text-sm text-violet-600 hover:text-violet-800 font-semibold underline"
           >
             {showHint ? '✅ Hint Shown' : '? Need a hint?'}
           </button>
@@ -1017,7 +1017,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
         <button
           type="submit"
           disabled={isCorrect !== null || !userAnswer}
-          className="w-full bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold py-3 rounded-lg disabled:opacity-50 hover:shadow-lg transform hover:scale-105 transition"
+          className="w-full bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-bold py-3 min-h-[44px] rounded-lg disabled:opacity-50 hover:shadow-lg transform hover:scale-105 transition"
         >
           Submit Answer ✓
         </button>
@@ -1064,7 +1064,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
       {isCorrect !== null && (
         <button
           onClick={handleNextQuestion}
-          className="w-full mt-4 bg-gradient-to-r from-orange-400 to-pink-500 text-white font-bold py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition"
+          className="w-full mt-4 bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold py-3 min-h-[44px] rounded-lg hover:shadow-lg transform hover:scale-105 transition"
         >
           Next Question →
         </button>

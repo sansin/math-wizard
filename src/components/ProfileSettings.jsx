@@ -57,14 +57,14 @@ export default function ProfileSettings({ userId, userProfile, onBack, onProfile
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-200 via-blue-200 to-pink-200 p-6">
+    <div className="min-h-screen bg-violet-50 p-4 sm:p-6">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold text-blue-700">⚙️ Settings</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">⚙️ Settings</h1>
           <button
             onClick={onBack}
-            className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+            className="px-6 py-2 min-h-[44px] bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
           >
             ← Back
           </button>
@@ -76,10 +76,10 @@ export default function ProfileSettings({ userId, userProfile, onBack, onProfile
             <h2 className="text-2xl font-bold text-gray-800">👤 My Profile</h2>
             <button
               onClick={() => setEditMode(!editMode)}
-              className={`px-4 py-2 rounded-lg font-semibold transition ${
+              className={`px-4 py-2 min-h-[44px] rounded-lg font-semibold transition ${
                 editMode
                   ? 'bg-red-500 text-white hover:bg-red-600'
-                  : 'bg-blue-500 text-white hover:bg-blue-600'
+                  : 'bg-violet-500 text-white hover:bg-violet-600'
               }`}
             >
               {editMode ? 'Cancel' : '✏️ Edit'}
@@ -91,15 +91,15 @@ export default function ProfileSettings({ userId, userProfile, onBack, onProfile
             <div className="space-y-4">
               <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
                 <span className="font-semibold text-gray-700">Name:</span>
-                <span className="text-xl text-blue-600">{form.name}</span>
+                <span className="text-xl text-violet-600">{form.name}</span>
               </div>
               <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
                 <span className="font-semibold text-gray-700">Age:</span>
-                <span className="text-xl text-blue-600">{form.age} years</span>
+                <span className="text-xl text-violet-600">{form.age} years</span>
               </div>
               <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
                 <span className="font-semibold text-gray-700">Grade:</span>
-                <span className="text-xl text-blue-600">Grade {form.grade}</span>
+                <span className="text-xl text-violet-600">Grade {form.grade}</span>
               </div>
               <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
                 <span className="font-semibold text-gray-700">Email:</span>
@@ -107,7 +107,7 @@ export default function ProfileSettings({ userId, userProfile, onBack, onProfile
               </div>
               <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
                 <span className="font-semibold text-gray-700">Account Type:</span>
-                <span className="text-sm font-bold px-3 py-1 rounded-full bg-blue-200 text-blue-800">
+                <span className="text-sm font-bold px-3 py-1 rounded-full bg-violet-200 text-violet-800">
                   {userProfile?.isGuest ? 'Guest' : 'Premium'}
                 </span>
               </div>
@@ -123,7 +123,7 @@ export default function ProfileSettings({ userId, userProfile, onBack, onProfile
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full p-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:border-blue-600"
+                  className="w-full p-3 border-2 border-violet-300 rounded-lg focus:outline-none focus:border-violet-600"
                   required
                 />
               </div>
@@ -137,7 +137,7 @@ export default function ProfileSettings({ userId, userProfile, onBack, onProfile
                     type="number"
                     value={form.age}
                     onChange={(e) => setForm({ ...form, age: e.target.value })}
-                    className="w-full p-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:border-blue-600"
+                    className="w-full p-3 border-2 border-violet-300 rounded-lg focus:outline-none focus:border-violet-600"
                     min="4"
                     max="18"
                     required
@@ -150,7 +150,7 @@ export default function ProfileSettings({ userId, userProfile, onBack, onProfile
                   <select
                     value={form.grade}
                     onChange={(e) => setForm({ ...form, grade: e.target.value })}
-                    className="w-full p-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:border-blue-600"
+                    className="w-full p-3 border-2 border-violet-300 rounded-lg focus:outline-none focus:border-violet-600"
                     required
                   >
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(g => (
@@ -176,7 +176,7 @@ export default function ProfileSettings({ userId, userProfile, onBack, onProfile
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="Leave blank to keep current password"
-                      className="w-full p-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:border-blue-600"
+                      className="w-full p-3 border-2 border-violet-300 rounded-lg focus:outline-none focus:border-violet-600"
                     />
                   </div>
 
@@ -189,7 +189,7 @@ export default function ProfileSettings({ userId, userProfile, onBack, onProfile
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Confirm new password"
-                      className="w-full p-3 border-2 border-blue-300 rounded-lg focus:outline-none focus:border-blue-600"
+                      className="w-full p-3 border-2 border-violet-300 rounded-lg focus:outline-none focus:border-violet-600"
                     />
                   </div>
                 </>
@@ -208,7 +208,7 @@ export default function ProfileSettings({ userId, userProfile, onBack, onProfile
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 rounded-lg hover:shadow-lg transform hover:scale-105 transition disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold py-3 min-h-[44px] rounded-lg hover:shadow-lg transform hover:scale-105 transition disabled:opacity-50"
               >
                 {loading ? 'Saving...' : '💾 Save Changes'}
               </button>
@@ -217,9 +217,9 @@ export default function ProfileSettings({ userId, userProfile, onBack, onProfile
         </div>
 
         {/* Settings Info */}
-        <div className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-6">
-          <h3 className="font-bold text-blue-800 mb-3">💡 Settings Tips</h3>
-          <ul className="text-sm text-blue-700 space-y-2">
+        <div className="bg-violet-50 border-l-4 border-violet-500 rounded-lg p-6">
+          <h3 className="font-bold text-violet-800 mb-3">💡 Settings Tips</h3>
+          <ul className="text-sm text-violet-700 space-y-2">
             <li>✅ Update your age/grade to get better recommendations</li>
             <li>✅ Change your name anytime</li>
             <li>✅ Password changes are secure and encrypted</li>
