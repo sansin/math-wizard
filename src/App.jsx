@@ -4,6 +4,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { getUserProfile } from './services/databaseService';
 import { getUserXP, getLevelForXP, levelProgress } from './services/xpService';
 import Registration from './components/Registration';
+import HomePage from './components/HomePage';
 import './App.css';
 
 // Lazy-load heavy page components for code-splitting
@@ -26,6 +27,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [xpData, setXpData] = useState({ totalXP: 0, level: 1, dailyQuestions: 0, dailyGoal: 10 });
+  const [showRegistration, setShowRegistration] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -102,9 +104,12 @@ function App() {
     );
   }
 
-  // Not logged in - show registration
+  // Not logged in
   if (!user || !userProfile) {
-    return <Registration onRegistrationComplete={handleRegistrationComplete} />;
+    if (showRegistration) {
+      return <Registration onRegistrationComplete={handleRegistrationComplete} />;
+    }
+    return <HomePage onGetStarted={() => setShowRegistration(true)} />;
   }
 
   // Main app
