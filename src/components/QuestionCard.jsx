@@ -273,7 +273,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
         }
       }
       
-      return 0.5; // Default probability
+      return null; // Cannot determine answer for this statistics question
     }
     
     if (op === 'calculus' || op === 'calculus_problem') {
@@ -993,7 +993,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
             onClick={() => setShowHint(!showHint)}
             className="text-sm text-blue-600 hover:text-blue-800 font-semibold underline"
           >
-            {showHint ? '✓ Show Hint' : '? Need a hint?'}
+            {showHint ? '✅ Hint Shown' : '? Need a hint?'}
           </button>
         )}
 

@@ -43,9 +43,12 @@ export default function ProfileSettings({ userId, userProfile, onBack, onProfile
       setMessage('✅ Profile updated successfully!');
       setEditMode(false);
       if (onProfileUpdated) await onProfileUpdated();
-      setTimeout(() => {
+      // Navigate back after a short delay so user sees the success message
+      const timer = setTimeout(() => {
         onBack();
       }, 1500);
+      // Return cleanup in case component unmounts before timeout fires
+      return () => clearTimeout(timer);
     } catch (error) {
       setMessage(`❌ Error: ${error.message}`);
     } finally {

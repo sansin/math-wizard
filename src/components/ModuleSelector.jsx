@@ -102,6 +102,8 @@ export default function ModuleSelector({ userId, userGrade, userProfile }) {
                   <button
                     key={grade}
                     onClick={() => { setSelectedGrade(grade); setSelectedModules([]); }}
+                    aria-label={`Select ${info.name}`}
+                    aria-pressed={isSelected}
                     className={`p-2 rounded-lg border-2 text-left transition flex flex-col ${
                       isSelected
                         ? `bg-gradient-to-r ${info.color} text-white border-2 border-white shadow-lg`
@@ -172,6 +174,8 @@ export default function ModuleSelector({ userId, userGrade, userProfile }) {
                   <button
                     key={module.name}
                     onClick={() => toggleModule(module.name)}
+                    aria-label={`${isSelected ? 'Deselect' : 'Select'} ${module.name} module`}
+                    aria-pressed={isSelected}
                     className={`p-2 rounded-lg border-2 text-left transition flex flex-col ${
                       isSelected
                         ? `bg-gradient-to-r ${color} text-white border-white shadow-lg`
