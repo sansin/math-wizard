@@ -1,0 +1,54 @@
+# Math Wizard - AI-Driven Math Learning App
+# Generated on 2026-01-19
+
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build outputs
+build/
+dist/
+.turbo/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+coverage/
+.nyc_output/
+
+# Other
+.cache/
+
+# Generated documentation (not source)
+BUILD_COMPLETE.md
+COMPLETION_CERTIFICATE.txt
+DEPLOYMENT_CHECKLIST.sh
+FEATURE_SUMMARY.md
+FINAL_SUMMARY.txt
+IMPLEMENTATION_GUIDE.md
+IMPLEMENTATION_REPORT.md
+MODULES_AND_COMPLEXITY.md
+MODULES_ENHANCEMENT_SUMMARY.md
+MODULES_IMPLEMENTATION_SUMMARY.md
+MODULE_SELECTOR_GUIDE.md
+PROJECT_SUMMARY.md
+QUICK_START_MODULES.md
+SETUP_GUIDE.md
+STATUS_REPORT.md
+TESTING_MODULES.md
+index.js
+setup.sh
