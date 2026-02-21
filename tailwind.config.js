@@ -21,7 +21,7 @@ export default {
       },
       animation: {
         'slide-in': 'slideIn 0.4s ease-out',
-        'bounce-slow': 'bounce 1s infinite',
+        'bounce-slow': 'wizardBounce 1s infinite',
         'fade-in': 'fadeIn 0.3s ease-out',
       },
       keyframes: {

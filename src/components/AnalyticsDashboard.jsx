@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Line, Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
 import { getUserStats, getUserAnswerHistory } from '../services/databaseService';
+import { getUserXP, getLevelForXP, levelProgress, getLevelTitle, xpToNextLevel } from '../services/xpService';
 
 export default function AnalyticsDashboard({ userId }) {
   const [stats, setStats] = useState({
@@ -12,6 +13,7 @@ export default function AnalyticsDashboard({ userId }) {
     sessionData: [],
   });
   const [dailyAccuracy, setDailyAccuracy] = useState({ labels: [], data: [] });
+  const [xpData, setXpData] = useState({ totalXP: 0, level: 1, dailyQuestions: 0, dailyGoal: 10 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,11 +24,13 @@ export default function AnalyticsDashboard({ userId }) {
   const loadAnalytics = async () => {
     setLoading(true);
     try {
-      const [statsData, history] = await Promise.all([
+      const [statsData, history, xp] = await Promise.all([
         getUserStats(userId),
         getUserAnswerHistory(userId),
+        getUserXP(userId),
       ]);
       setStats(statsData);
+      setXpData(xp);
 
       // Compute daily accuracy from real answer history
       if (history && history.length > 0) {
@@ -146,9 +150,62 @@ export default function AnalyticsDashboard({ userId }) {
     <div className="min-h-screen bg-violet-50 p-4 sm:p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">📊 Your Progress</h1>
           <p className="text-gray-600">Keep learning and improving! 🚀</p>
+        </div>
+
+        {/* Level & Daily Goal Banner */}
+        <div className="grid sm:grid-cols-2 gap-4 mb-8">
+          {/* Level Card */}
+          <div className="bg-white rounded-xl p-5 shadow-lg border-2 border-violet-200">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-sm font-semibold text-gray-500">Level {getLevelForXP(xpData.totalXP)}</p>
+                <p className="text-xl font-bold text-violet-600">{getLevelTitle(getLevelForXP(xpData.totalXP))}</p>
+              </div>
+              <div className="text-3xl">
+                {getLevelForXP(xpData.totalXP) >= 8 ? '🏆' : getLevelForXP(xpData.totalXP) >= 5 ? '⭐' : '🌱'}
+              </div>
+            </div>
+            <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-violet-400 to-purple-600 rounded-full transition-all duration-700 relative"
+                style={{ width: `${Math.round(levelProgress(xpData.totalXP) * 100)}%` }}
+              >
+                <div className="absolute inset-0 xp-bar-shimmer rounded-full" />
+              </div>
+            </div>
+            <div className="flex justify-between mt-1 text-xs text-gray-500">
+              <span>⚡ {xpData.totalXP} XP</span>
+              <span>{xpToNextLevel(xpData.totalXP) > 0 ? `${xpToNextLevel(xpData.totalXP)} XP to next level` : 'Max level!'}</span>
+            </div>
+          </div>
+
+          {/* Daily Goal Card */}
+          <div className="bg-white rounded-xl p-5 shadow-lg border-2 border-amber-200">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-sm font-semibold text-gray-500">Daily Goal</p>
+                <p className="text-xl font-bold text-amber-600">
+                  {Math.min(xpData.dailyQuestions, xpData.dailyGoal)}/{xpData.dailyGoal} questions
+                </p>
+              </div>
+              <div className="text-3xl">
+                {xpData.dailyQuestions >= xpData.dailyGoal ? '🎯' : '📋'}
+              </div>
+            </div>
+            <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-700"
+                style={{ width: `${Math.min(100, Math.round((xpData.dailyQuestions / xpData.dailyGoal) * 100))}%` }}
+              />
+            </div>
+            <div className="flex justify-between mt-1 text-xs text-gray-500">
+              <span>{xpData.dailyQuestions >= xpData.dailyGoal ? '✅ Goal complete!' : `${xpData.dailyGoal - xpData.dailyQuestions} more to go`}</span>
+              <span>{new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+            </div>
+          </div>
         </div>
 
         {/* KPI Cards */}

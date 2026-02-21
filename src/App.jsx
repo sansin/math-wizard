@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { auth } from './firebaseConfig';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { getUserProfile } from './services/databaseService';
+import { getUserXP, getLevelForXP, levelProgress } from './services/xpService';
 import Registration from './components/Registration';
 import ModuleSelector from './components/ModuleSelector';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
@@ -14,6 +15,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [xpData, setXpData] = useState({ totalXP: 0, level: 1, dailyQuestions: 0, dailyGoal: 10 });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -22,12 +24,16 @@ function App() {
         try {
           const profile = await getUserProfile(currentUser.uid);
           setUserProfile(profile);
+          // Load XP data
+          const xp = await getUserXP(currentUser.uid);
+          setXpData(xp);
         } catch (error) {
           console.error('Error fetching user profile:', error);
         }
       } else {
         setUser(null);
         setUserProfile(null);
+        setXpData({ totalXP: 0, level: 1, dailyQuestions: 0, dailyGoal: 10 });
       }
       setLoading(false);
     });
@@ -53,9 +59,24 @@ function App() {
       try {
         const profile = await getUserProfile(user.uid);
         setUserProfile(profile);
+        const xp = await getUserXP(user.uid);
+        setXpData(xp);
       } catch (error) {
         console.error('Error refreshing profile:', error);
       }
+    }
+  };
+
+  // Called by QuestionCard after each answer to keep nav XP bar live
+  const handleXPUpdate = (xpResult) => {
+    if (xpResult) {
+      setXpData(prev => ({
+        ...prev,
+        totalXP: xpResult.totalXP,
+        level: xpResult.level,
+        dailyQuestions: xpResult.dailyQuestions,
+        dailyGoal: xpResult.dailyGoal,
+      }));
     }
   };
 
@@ -64,7 +85,7 @@ function App() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-500 to-purple-600">
         <div className="text-center">
-          <div className="text-6xl mb-4 animate-bounce">🧙</div>
+          <div className="text-6xl mb-4 animate-wizard-bounce">🧙</div>
           <p className="text-2xl sm:text-3xl font-bold text-white">Loading Math Wizard...</p>
         </div>
       </div>
@@ -92,10 +113,26 @@ function App() {
               <h1 className="text-xl sm:text-2xl font-bold">Math Wizard</h1>
             </button>
 
-            {/* User Info - hidden on mobile */}
-            <div className="hidden md:block text-center">
-              <p className="text-sm opacity-90">Welcome back!</p>
-              <p className="font-semibold">{userProfile?.name} • Grade {userProfile?.grade}</p>
+            {/* User Info + XP Bar - hidden on mobile */}
+            <div className="hidden md:flex flex-col items-center gap-1">
+              <p className="font-semibold text-sm">{userProfile?.name} • Grade {userProfile?.grade}</p>
+              <div className="flex items-center gap-2 text-xs">
+                <span className="font-bold text-amber-300">⚡ Lv.{getLevelForXP(xpData.totalXP)}</span>
+                <div className="w-24 h-2 bg-white bg-opacity-30 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-300 to-amber-500 rounded-full transition-all duration-500 relative"
+                    style={{ width: `${Math.round(levelProgress(xpData.totalXP) * 100)}%` }}
+                  >
+                    <div className="absolute inset-0 xp-bar-shimmer rounded-full" />
+                  </div>
+                </div>
+                <span className="opacity-80">{xpData.totalXP} XP</span>
+              </div>
+              {/* Daily Goal */}
+              <div className="flex items-center gap-1 text-xs opacity-80">
+                <span>📋 {Math.min(xpData.dailyQuestions, xpData.dailyGoal)}/{xpData.dailyGoal} today</span>
+                {xpData.dailyQuestions >= xpData.dailyGoal && <span className="text-amber-300">✓</span>}
+              </div>
             </div>
 
             {/* Desktop Navigation Buttons - hidden on mobile */}
@@ -159,9 +196,25 @@ function App() {
           {/* Mobile Menu - slides down when open */}
           {menuOpen && (
             <div className="md:hidden mt-3 pt-3 border-t border-white border-opacity-30 space-y-2">
-              <p className="text-sm text-center opacity-90 mb-2">
-                {userProfile?.name} • Grade {userProfile?.grade}
-              </p>
+              <div className="text-center mb-2">
+                <p className="text-sm opacity-90">
+                  {userProfile?.name} • Grade {userProfile?.grade}
+                </p>
+                <div className="flex items-center justify-center gap-2 mt-1 text-xs">
+                  <span className="font-bold text-amber-300">⚡ Lv.{getLevelForXP(xpData.totalXP)}</span>
+                  <div className="w-20 h-2 bg-white bg-opacity-30 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-amber-300 to-amber-500 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.round(levelProgress(xpData.totalXP) * 100)}%` }}
+                    />
+                  </div>
+                  <span className="opacity-80">{xpData.totalXP} XP</span>
+                </div>
+                <p className="text-xs opacity-70 mt-1">
+                  📋 {Math.min(xpData.dailyQuestions, xpData.dailyGoal)}/{xpData.dailyGoal} questions today
+                  {xpData.dailyQuestions >= xpData.dailyGoal && ' ✓'}
+                </p>
+              </div>
               <button
                 onClick={() => { setCurrentPage('home'); setMenuOpen(false); }}
                 className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition ${
@@ -207,7 +260,7 @@ function App() {
       <main className={currentPage === 'home' ? '' : 'py-8'}>
         {currentPage === 'home' && (
           <div key="home" className="animate-fade-in">
-            <ModuleSelector userId={user.uid} userGrade={userProfile?.grade} userProfile={userProfile} />
+            <ModuleSelector userId={user.uid} userGrade={userProfile?.grade} userProfile={userProfile} onXPUpdate={handleXPUpdate} />
           </div>
         )}
         {currentPage === 'analytics' && (

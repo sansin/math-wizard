@@ -30,11 +30,10 @@ const convertGradeFormat = (grade) => {
   return '9+';
 };
 
-export default function ModuleSelector({ userId, userGrade, userProfile }) {
+export default function ModuleSelector({ userId, userGrade, userProfile, onXPUpdate }) {
   const [mode, setMode] = useState(null);
   const [selectedGrade, setSelectedGrade] = useState(convertGradeFormat(userGrade) || '4-5');
   const [selectedModules, setSelectedModules] = useState([]);
-  const [questionCount, setQuestionCount] = useState(0);
 
   if (mode) {
     return (
@@ -43,11 +42,10 @@ export default function ModuleSelector({ userId, userGrade, userProfile }) {
         userGrade={selectedGrade}
         mode={mode}
         selectedModules={selectedModules}
-        onNext={() => setQuestionCount(questionCount + 1)}
         onEndSession={() => {
           setMode(null);
-          setQuestionCount(0);
         }}
+        onXPUpdate={onXPUpdate}
       />
     );
   }
@@ -166,9 +164,33 @@ export default function ModuleSelector({ userId, userGrade, userProfile }) {
                   'from-rose-400 to-pink-400',
                   'from-cyan-400 to-teal-400',
                 ];
-                const moduleIcons = ['📐', '➕', '➖', '✖️', '➗', '🔢', '📊', '🧩', '🔺', '💡', '📏', '🎲', '⚡', '🏆', '🧮'];
+                const moduleIcons = {
+                  'Addition': '➕',
+                  'Subtraction': '➖',
+                  'Multiplication': '✖️',
+                  'Division': '➗',
+                  'Fractions': '🥧',
+                  'Logic & Patterns': '🧩',
+                  'Arithmetic Operations': '🔢',
+                  'Arithmetic': '🔢',
+                  'Arithmetic & Number Theory': '🔢',
+                  'Fractions & Decimals': '🥧',
+                  'Fractions, Decimals & Percentages': '💯',
+                  'Geometry': '📐',
+                  'Geometry & Trigonometry': '📐',
+                  'Variables & Equations': '🔤',
+                  'Algebra': '🔤',
+                  'Pre-Algebra': '🔤',
+                  'Statistics & Probability': '📊',
+                  'Advanced Reasoning': '🧠',
+                  'Mathematical Reasoning': '🧠',
+                  'Functions & Graphing': '📈',
+                  'Functions & Analysis': '📈',
+                  'Exponents & Roots': '⚡',
+                  'Calculus Basics': '∫',
+                };
+                const icon = moduleIcons[module.name] || '📘';
                 const color = moduleColors[index % moduleColors.length];
-                const icon = moduleIcons[index % moduleIcons.length];
 
                 return (
                   <button

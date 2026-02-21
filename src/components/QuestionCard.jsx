@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { generateQuestion } from '../services/aiService';
 import { saveAnswer, getUserAnswerHistory } from '../services/databaseService';
 import { calculateGradeAwareDifficulty } from '../data/mathModules';
+import { awardXP, getLevelTitle } from '../services/xpService';
 
 const TEST_QUESTION_COUNT = 10;
+const AUTO_ADVANCE_DELAY = 1800; // ms after correct answer before auto-advance
 
 /** Parse user input that may be a fraction like "1/2", mixed number, or plain number */
 const parseFractionInput = (input) => {
@@ -31,7 +33,7 @@ const parseFractionInput = (input) => {
   return parseFloat(trimmed);
 };
 
-export default function QuestionCard({ userId, userGrade, mode, selectedModules, onNext, onEndSession }) {
+export default function QuestionCard({ userId, userGrade, mode, selectedModules, onNext, onEndSession, onXPUpdate }) {
   const [question, setQuestion] = useState('');
   const [operation, setOperation] = useState('');
   const [userAnswer, setUserAnswer] = useState('');
@@ -50,8 +52,20 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
   const [showPlaySummary, setShowPlaySummary] = useState(false);
   const timerRef = useRef(null);
 
+  // Phase 2: Engagement state
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [xpEarnedPopup, setXpEarnedPopup] = useState(null); // { xp, streak, leveledUp, newLevel }
+  const [sessionXP, setSessionXP] = useState(0);
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [newLevelInfo, setNewLevelInfo] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const autoAdvanceRef = useRef(null);
+
   useEffect(() => {
     loadQuestion();
+    return () => {
+      if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -613,7 +627,10 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting || isCorrect !== null) return; // debounce & prevent double submit
+    setIsSubmitting(true);
     
+    try {
     // Check if answer was extracted successfully
     if (correctAnswer === null) {
       setFeedback('❌ Unable to extract answer from this question. Please try the next question.');
@@ -649,6 +666,11 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
     }
     
     setIsCorrect(correct);
+    
+    // Update streak
+    const newStreak = correct ? currentStreak + 1 : 0;
+    setCurrentStreak(newStreak);
+    
     if (correct) {
       setFeedback('🎉 Correct! Amazing!');
       setShowCelebration(true);
@@ -681,6 +703,38 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
       }]);
     }
 
+    // Award XP
+    try {
+      const xpResult = await awardXP(userId, {
+        correct,
+        streak: correct ? newStreak : 0,
+        difficulty: newDifficulty,
+      });
+
+      if (xpResult.xpEarned > 0) {
+        setSessionXP(prev => prev + xpResult.xpEarned);
+        setXpEarnedPopup({
+          xp: xpResult.xpEarned,
+          streak: newStreak,
+          leveledUp: xpResult.leveledUp,
+          newLevel: xpResult.level,
+        });
+        setTimeout(() => setXpEarnedPopup(null), 2200);
+
+        // Level up notification
+        if (xpResult.leveledUp) {
+          setNewLevelInfo({ level: xpResult.level, title: getLevelTitle(xpResult.level) });
+          setShowLevelUp(true);
+          setTimeout(() => setShowLevelUp(false), 3500);
+        }
+      }
+
+      // Notify parent of XP changes
+      if (onXPUpdate) onXPUpdate(xpResult);
+    } catch (error) {
+      console.error('Error awarding XP:', error);
+    }
+
     // Save to database
     try {
       await saveAnswer(userId, {
@@ -693,9 +747,24 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
     } catch (error) {
       console.error('Error saving answer:', error);
     }
+
+    // Auto-advance after correct answer (play mode only)
+    if (correct && mode === 'play') {
+      autoAdvanceRef.current = setTimeout(() => {
+        handleNextQuestion();
+      }, AUTO_ADVANCE_DELAY);
+    }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleNextQuestion = () => {
+    // Clear any pending auto-advance
+    if (autoAdvanceRef.current) {
+      clearTimeout(autoAdvanceRef.current);
+      autoAdvanceRef.current = null;
+    }
     // In test mode, check if we've reached the question limit
     if (mode === 'test' && sessionStats.total >= TEST_QUESTION_COUNT) {
       clearInterval(timerRef.current);
@@ -707,6 +776,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
     setFeedback('');
     setShowHint(false);
     setShowCelebration(false);
+    setXpEarnedPopup(null);
     loadQuestion();
     if (onNext) onNext();
   };
@@ -807,24 +877,28 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
     const emoji = pct >= 80 ? '🌟' : pct >= 60 ? '👍' : pct >= 40 ? '💪' : '📚';
 
     return (
-      <div className="max-w-lg mx-auto bg-white rounded-2xl p-6 shadow-xl">
+      <div className="max-w-lg mx-auto bg-white rounded-2xl p-6 shadow-xl animate-fade-in">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold text-gray-800 mb-2">{emoji} Session Complete!</h2>
           <p className="text-gray-500">Great practice session — here's your recap</p>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-violet-50 rounded-xl p-4 text-center">
-            <p className="text-3xl font-bold text-violet-600">{sessionStats.total}</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <div className="bg-violet-50 rounded-xl p-3 text-center">
+            <p className="text-2xl font-bold text-violet-600">{sessionStats.total}</p>
             <p className="text-xs text-gray-500 mt-1">Questions</p>
           </div>
-          <div className="bg-green-50 rounded-xl p-4 text-center">
-            <p className="text-3xl font-bold text-green-600">{sessionStats.correct}</p>
+          <div className="bg-green-50 rounded-xl p-3 text-center">
+            <p className="text-2xl font-bold text-green-600">{sessionStats.correct}</p>
             <p className="text-xs text-gray-500 mt-1">Correct</p>
           </div>
-          <div className="bg-purple-50 rounded-xl p-4 text-center">
-            <p className="text-3xl font-bold text-purple-600">{pct}%</p>
+          <div className="bg-purple-50 rounded-xl p-3 text-center">
+            <p className="text-2xl font-bold text-purple-600">{pct}%</p>
             <p className="text-xs text-gray-500 mt-1">Accuracy</p>
+          </div>
+          <div className="bg-amber-50 rounded-xl p-3 text-center">
+            <p className="text-2xl font-bold text-amber-600">+{sessionXP}</p>
+            <p className="text-xs text-gray-500 mt-1">XP Earned</p>
           </div>
         </div>
 
@@ -866,25 +940,29 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
     const gradeColor = pct >= 80 ? 'text-green-600' : pct >= 60 ? 'text-yellow-600' : 'text-red-600';
 
     return (
-      <div className="max-w-lg mx-auto bg-white rounded-2xl p-6 shadow-xl">
+      <div className="max-w-lg mx-auto bg-white rounded-2xl p-6 shadow-xl animate-fade-in">
         <div className="text-center mb-6">
           <h2 className="text-3xl font-bold text-gray-800 mb-2">📝 Test Complete!</h2>
           <p className="text-gray-500">Here's how you did</p>
         </div>
 
         {/* Score Card */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-violet-50 rounded-xl p-4 text-center">
-            <p className="text-3xl font-bold text-violet-600">{sessionStats.correct}/{sessionStats.total}</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <div className="bg-violet-50 rounded-xl p-3 text-center">
+            <p className="text-2xl font-bold text-violet-600">{sessionStats.correct}/{sessionStats.total}</p>
             <p className="text-xs text-gray-500 mt-1">Correct</p>
           </div>
-          <div className="bg-purple-50 rounded-xl p-4 text-center">
-            <p className={`text-3xl font-bold ${gradeColor}`}>{grade}</p>
+          <div className="bg-purple-50 rounded-xl p-3 text-center">
+            <p className={`text-2xl font-bold ${gradeColor}`}>{grade}</p>
             <p className="text-xs text-gray-500 mt-1">{pct}%</p>
           </div>
-          <div className="bg-amber-50 rounded-xl p-4 text-center">
-            <p className="text-3xl font-bold text-amber-600">{formatTime(elapsedTime)}</p>
+          <div className="bg-amber-50 rounded-xl p-3 text-center">
+            <p className="text-2xl font-bold text-amber-600">{formatTime(elapsedTime)}</p>
             <p className="text-xs text-gray-500 mt-1">Time</p>
+          </div>
+          <div className="bg-emerald-50 rounded-xl p-3 text-center">
+            <p className="text-2xl font-bold text-emerald-600">+{sessionXP}</p>
+            <p className="text-xs text-gray-500 mt-1">XP Earned</p>
           </div>
         </div>
 
@@ -932,7 +1010,7 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
     <div className="max-w-xl mx-auto bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-6 shadow-lg">
       {/* Session Header with Difficulty & End Button */}
       <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="text-sm font-semibold text-gray-600">
             Operation: <span className="text-violet-600 capitalize">{operation}</span>
           </div>
@@ -945,9 +1023,16 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
           }`}>
             📊 {sessionStats.difficulty}
           </div>
+          {/* Streak Counter */}
+          {currentStreak >= 2 && (
+            <div className="px-3 py-1 rounded-full bg-gradient-to-r from-orange-400 to-red-500 text-white text-sm font-bold animate-bounce-slow flex items-center gap-1">
+              🔥 {currentStreak} streak
+            </div>
+          )}
         </div>
         <button
           onClick={() => {
+            if (autoAdvanceRef.current) clearTimeout(autoAdvanceRef.current);
             if (mode === 'play' && sessionStats.total > 0) {
               setShowPlaySummary(true);
             } else {
@@ -1042,9 +1127,36 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
         </div>
       )}
 
+      {/* XP Earned Popup */}
+      {xpEarnedPopup && (
+        <div className="flex justify-center mt-3 animate-xp-popup">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold shadow-lg">
+            <span className="text-lg">⚡</span>
+            <span>+{xpEarnedPopup.xp} XP</span>
+            {xpEarnedPopup.streak >= 3 && (
+              <span className="text-xs bg-white bg-opacity-30 rounded-full px-2 py-0.5">
+                🔥 {xpEarnedPopup.streak}x
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Level Up Overlay */}
+      {showLevelUp && newLevelInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+          <div className="bg-white rounded-2xl p-8 shadow-2xl text-center animate-level-up border-4 border-amber-400 max-w-sm mx-4">
+            <div className="text-6xl mb-3">🏆</div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-1">Level Up!</h2>
+            <p className="text-4xl font-bold text-violet-600 mb-2">Level {newLevelInfo.level}</p>
+            <p className="text-lg text-amber-600 font-semibold">{newLevelInfo.title}</p>
+          </div>
+        </div>
+      )}
+
       {/* Feedback */}
       {feedback && (
-        <div className={`mt-4 p-4 rounded-lg font-bold ${
+        <div className={`mt-4 p-4 rounded-lg font-bold animate-slide-in ${
           isCorrect 
             ? 'bg-green-100 text-green-700 border-2 border-green-400 text-center text-lg' 
             : 'bg-red-100 text-red-700 border-2 border-red-400'
@@ -1060,13 +1172,20 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
         </div>
       )}
 
+      {/* Auto-advance indicator (play mode, correct answer) */}
+      {isCorrect === true && mode === 'play' && (
+        <div className="mt-2 text-center text-sm text-gray-400 font-medium animate-pulse">
+          Next question in a moment...
+        </div>
+      )}
+
       {/* Next Button */}
       {isCorrect !== null && (
         <button
           onClick={handleNextQuestion}
-          className="w-full mt-4 bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold py-3 min-h-[44px] rounded-lg hover:shadow-lg transform hover:scale-105 transition"
+          className="w-full mt-3 bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold py-3 min-h-[44px] rounded-lg hover:shadow-lg transform hover:scale-105 transition"
         >
-          Next Question →
+          {isCorrect && mode === 'play' ? 'Skip Ahead →' : 'Next Question →'}
         </button>
       )}
     </div>
