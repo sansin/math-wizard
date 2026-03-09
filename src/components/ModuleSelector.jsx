@@ -31,12 +31,12 @@ const convertGradeFormat = (grade) => {
   return '9+';
 };
 
-export default function ModuleSelector({ userId, userGrade, userProfile, onXPUpdate }) {
+export default function ModuleSelector({ userId, userGrade, userProfile, onXPUpdate, previewMode = false }) {
   const [mode, setMode] = useState(null);
   const [selectedGrade, setSelectedGrade] = useState(convertGradeFormat(userGrade) || '4-5');
   const [selectedModules, setSelectedModules] = useState([]);
 
-  if (mode === 'challenge') {
+  if (mode === 'challenge' && !previewMode) {
     return (
       <ChallengeMode
         userId={userId}
@@ -252,12 +252,19 @@ export default function ModuleSelector({ userId, userGrade, userProfile, onXPUpd
                 📝 Test
               </button>
               <button
-                onClick={() => setMode('challenge')}
-                className="bg-gradient-to-r from-rose-500 to-pink-600 text-white font-bold py-3 min-h-[44px] rounded-lg hover:shadow-lg transform hover:scale-105 transition text-xs sm:text-sm"
+                onClick={() => !previewMode && setMode('challenge')}
+                disabled={previewMode}
+                title={previewMode ? 'Challenge mode needs Firebase login' : 'Challenge a friend'}
+                className="bg-gradient-to-r from-rose-500 to-pink-600 text-white font-bold py-3 min-h-[44px] rounded-lg hover:shadow-lg transform hover:scale-105 transition text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                ⚔️ Challenge
+                {previewMode ? '🔒 Challenge' : '⚔️ Challenge'}
               </button>
             </div>
+            {previewMode && (
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                Demo mode active: Play/Test works without login; Challenge requires Firebase.
+              </p>
+            )}
           </div>
         </div>
       </div>
