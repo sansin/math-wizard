@@ -54,29 +54,44 @@ const MAX_STREAK_BONUS = 20;  // cap at 10-streak
 const DEFAULT_DAILY_GOAL = 10;
 
 // ─── Pure helpers ────────────────────────────────────────────────────
+const normalizeXP = (xp) => {
+  const numeric = Number(xp);
+  if (!Number.isFinite(numeric)) return 0;
+  return Math.max(0, numeric);
+};
+
+const normalizeStreak = (streak) => {
+  const numeric = Number(streak);
+  if (!Number.isFinite(numeric)) return 0;
+  return Math.max(0, numeric);
+};
 
 /** Return the level (1-10) for a given total XP amount */
 export const getLevelForXP = (xp) => {
+  const safeXP = normalizeXP(xp);
   for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
-    if (xp >= LEVEL_THRESHOLDS[i]) return i + 1;
+    if (safeXP >= LEVEL_THRESHOLDS[i]) return i + 1;
   }
   return 1;
 };
 
 /** XP required to reach the NEXT level (returns 0 if max) */
 export const xpToNextLevel = (xp) => {
-  const level = getLevelForXP(xp);
+  const safeXP = normalizeXP(xp);
+  const level = getLevelForXP(safeXP);
   if (level >= LEVEL_THRESHOLDS.length) return 0; // max level
-  return LEVEL_THRESHOLDS[level] - xp;
+  return LEVEL_THRESHOLDS[level] - safeXP;
 };
 
 /** How far through the current level as a 0-1 fraction */
 export const levelProgress = (xp) => {
-  const level = getLevelForXP(xp);
+  const safeXP = normalizeXP(xp);
+  const level = getLevelForXP(safeXP);
   if (level >= LEVEL_THRESHOLDS.length) return 1; // max
   const base = LEVEL_THRESHOLDS[level - 1];
   const next = LEVEL_THRESHOLDS[level];
-  return (xp - base) / (next - base);
+  const raw = (safeXP - base) / (next - base);
+  return Math.max(0, Math.min(1, raw));
 };
 
 /** Title for a given level */
@@ -86,7 +101,8 @@ export const getLevelTitle = (level) =>
 /** Calculate XP earned from one answer */
 export const calculateXPEarned = (correct, streak, difficulty) => {
   if (!correct) return 0;
-  const streakBonus = Math.min(streak * STREAK_BONUS_PER, MAX_STREAK_BONUS);
+  const safeStreak = normalizeStreak(streak);
+  const streakBonus = Math.min(safeStreak * STREAK_BONUS_PER, MAX_STREAK_BONUS);
   const diffBonus = DIFFICULTY_BONUS[difficulty] || 0;
   return BASE_XP + streakBonus + diffBonus;
 };

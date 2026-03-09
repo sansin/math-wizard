@@ -50,6 +50,14 @@ describe('xpService', () => {
         expect(getLevelForXP(threshold)).toBe(i + 1);
       });
     });
+
+    it('clamps negative XP to level 1', () => {
+      expect(getLevelForXP(-25)).toBe(1);
+    });
+
+    it('treats non-numeric XP as 0', () => {
+      expect(getLevelForXP('not-a-number')).toBe(1);
+    });
   });
 
   // ─── xpToNextLevel ──────────────────────────
@@ -67,6 +75,10 @@ describe('xpService', () => {
       expect(xpToNextLevel(5000)).toBe(0);
       expect(xpToNextLevel(9999)).toBe(0);
     });
+
+    it('treats negative XP as 0 and returns full distance to level 2', () => {
+      expect(xpToNextLevel(-10)).toBe(100);
+    });
   });
 
   // ─── levelProgress ──────────────────────────
@@ -81,6 +93,10 @@ describe('xpService', () => {
 
     it('returns 1 at max level', () => {
       expect(levelProgress(5000)).toBe(1);
+    });
+
+    it('clamps negative XP progress to 0', () => {
+      expect(levelProgress(-50)).toBe(0);
     });
   });
 
@@ -137,6 +153,10 @@ describe('xpService', () => {
     it('combines streak + difficulty bonuses', () => {
       // streak 5 → +10, Hard → +10, base 10 → 30
       expect(calculateXPEarned(true, 5, 'Hard')).toBe(30);
+    });
+
+    it('does not reduce XP for negative streak values', () => {
+      expect(calculateXPEarned(true, -3, 'Medium')).toBe(15);
     });
   });
 });
