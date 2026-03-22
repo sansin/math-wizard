@@ -1,5 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense, useCallback } from 'react';
-import { auth } from './firebaseConfig';
+import { auth, isFirebaseConfigured, firebaseConfigError } from './firebaseConfig';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { getUserProfile } from './services/databaseService';
 import { getUserXP, getLevelForXP, levelProgress } from './services/xpService';
@@ -28,8 +28,15 @@ function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [xpData, setXpData] = useState({ totalXP: 0, level: 1, dailyQuestions: 0, dailyGoal: 10 });
   const [showRegistration, setShowRegistration] = useState(false);
+  const [previewCoachingMode, setPreviewCoachingMode] = useState(false);
 
   useEffect(() => {
+    if (!isFirebaseConfigured || !auth) {
+      console.error('Firebase configuration error:', firebaseConfigError);
+      setLoading(false);
+      return () => {};
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
@@ -106,6 +113,77 @@ function App() {
 
   // Not logged in
   if (!user || !userProfile) {
+    if (!isFirebaseConfigured) {
+      if (previewCoachingMode) {
+        return (
+          <div className="min-h-screen bg-violet-50">
+            <div className="sticky top-0 z-[60] px-4 py-3 bg-amber-100 border-b border-amber-300 flex items-center justify-between gap-3">
+              <p className="text-amber-900 text-xs sm:text-sm font-semibold">
+                Demo Coaching Mode: running without Firebase login.
+              </p>
+              <button
+                onClick={() => setPreviewCoachingMode(false)}
+                className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs sm:text-sm font-semibold transition"
+              >
+                Back to Home
+              </button>
+            </div>
+            <Suspense fallback={<PageSpinner />}>
+              <ModuleSelector
+                userId="demo-local"
+                userGrade="4-5"
+                userProfile={{ name: 'Demo Learner', grade: '4-5' }}
+                onXPUpdate={() => {}}
+                previewMode
+              />
+            </Suspense>
+          </div>
+        );
+      }
+
+      return (
+        <div className="relative">
+          <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[60] px-4 py-2 rounded-full bg-amber-100 border border-amber-300 text-amber-800 text-xs sm:text-sm shadow-md">
+            Preview mode: Firebase not configured
+          </div>
+          <HomePage onGetStarted={() => setShowRegistration(true)} />
+          {showRegistration && (
+            <div className="fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-4">
+              <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full p-6 sm:p-8 border border-amber-200">
+                <h2 className="text-2xl font-bold text-amber-700 mb-3">Firebase setup required</h2>
+                <p className="text-gray-700 mb-3">
+                  Registration/login is disabled in preview mode because Firebase environment variables are missing.
+                </p>
+                <p className="text-sm text-gray-600 mb-4">{firebaseConfigError}</p>
+                <ol className="list-decimal list-inside text-sm text-gray-700 space-y-1 mb-6">
+                  <li>Copy <code>.env.example</code> to <code>.env</code>.</li>
+                  <li>Fill in your Firebase values in <code>.env</code>.</li>
+                  <li>Restart the dev server (<code>npm start</code>).</li>
+                </ol>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    onClick={() => {
+                      setShowRegistration(false);
+                      setPreviewCoachingMode(true);
+                    }}
+                    className="px-5 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-semibold transition"
+                  >
+                    Start Demo Coaching
+                  </button>
+                  <button
+                    onClick={() => setShowRegistration(false)}
+                    className="px-5 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-semibold transition"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
     if (showRegistration) {
       return <Registration onRegistrationComplete={handleRegistrationComplete} />;
     }
