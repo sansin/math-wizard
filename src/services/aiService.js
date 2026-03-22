@@ -1,6 +1,49 @@
 import axios from 'axios';
 import { getRandomTopicByGrade, mathModulesByGrade } from '../data/mathModules';
 
+// Prevent decimal or fraction division for younger grades
+const shouldUseWholeNumberDivisionOnly = (userGrade) => {
+  return userGrade === '2-3' || userGrade === '4-5';
+};
+
+const isValidWholeNumberDivisionResponse = (question, answer, userGrade, operation) => {
+  if (!(operation === 'division' && shouldUseWholeNumberDivisionOnly(userGrade))) {
+    return true;
+  }
+
+  if (answer === null || answer === undefined || answer === '') {
+    return false;
+  }
+
+  return Number.isInteger(Number(answer));
+};
+
+const generateWholeNumberDivisionQuestion = (grade = '4-5') => {
+  const gradeDivisionRanges = {
+    'KG-1': { maxDivisor: 5, maxQuotient: 10 },
+    '2-3': { maxDivisor: 10, maxQuotient: 10 },
+    '4-5': { maxDivisor: 12, maxQuotient: 12 },
+    '6-7': { maxDivisor: 15, maxQuotient: 15 },
+    '7-8': { maxDivisor: 20, maxQuotient: 20 },
+    '9+': { maxDivisor: 25, maxQuotient: 25 },
+  };
+
+  const config = gradeDivisionRanges[grade] || gradeDivisionRanges['4-5'];
+
+  const divisor = Math.floor(Math.random() * config.maxDivisor) + 1;
+  const quotient = Math.floor(Math.random() * config.maxQuotient) + 1;
+  const dividend = divisor * quotient;
+
+  const templates = [
+    `What is ${dividend} ÷ ${divisor}?`,
+    `If you split ${dividend} equally among ${divisor} groups, how many in each group?`,
+    `${dividend} ÷ ${divisor} = ?`,
+    `Divide: ${dividend} ÷ ${divisor}`,
+  ];
+
+  return templates[Math.floor(Math.random() * templates.length)];
+};
+
 /**
  * Generate a question. Always returns { question: string, answer: number|string|null }
  * - AI path: returns both question and answer from GPT
@@ -10,19 +53,19 @@ const generateQuestion = async (userHistory, userGrade, operation, selectedModul
   // List of operations that benefit from AI generation (more variety, better contextuality)
   const aiPreferredOperations = ['logic_patterns', 'algebra', 'geometry', 'statistics', 'calculus', 'fractions', 'decimals'];
   const isAiPreferred = aiPreferredOperations.includes(operation);
-  
+
   // If specific modules are selected, always use AI to ensure module-specific questions
   if (selectedModules && selectedModules.length > 0 && process.env.REACT_APP_OPENAI_API_KEY) {
     return generateAIQuestion(userHistory, userGrade, operation, selectedModules, isAiPreferred);
   }
-  
+
   // For AI-preferred operations, use AI 90% of the time (increased from 70%)
   // For other operations, use AI 70% of the time
   const aiProbability = isAiPreferred ? 0.9 : 0.7;
   if (process.env.REACT_APP_OPENAI_API_KEY && Math.random() < aiProbability) {
     return generateAIQuestion(userHistory, userGrade, operation, selectedModules, isAiPreferred);
   }
-  
+
   // Fallback to rule-based generation (answer computed by caller)
   const fallbackQ = generateFallbackQuestion(operation, userGrade);
   return { question: fallbackQ, answer: null };
@@ -36,13 +79,13 @@ const getTopicFromSelectedModules = (userGrade, selectedModules) => {
   if (!selectedModules || selectedModules.length === 0) {
     return getRandomTopicByGrade(userGrade);
   }
-  
+
   const gradeData = mathModulesByGrade[userGrade];
-  
+
   if (!gradeData || !gradeData.modules) {
     return getRandomTopicByGrade(userGrade);
   }
-  
+
   // Collect all topics from selected modules
   const topicsFromSelectedModules = [];
   gradeData.modules.forEach(module => {
@@ -50,12 +93,12 @@ const getTopicFromSelectedModules = (userGrade, selectedModules) => {
       topicsFromSelectedModules.push(...module.topics);
     }
   });
-  
+
   // Return random topic from selected modules, or fallback
   if (topicsFromSelectedModules.length > 0) {
     return topicsFromSelectedModules[Math.floor(Math.random() * topicsFromSelectedModules.length)];
   }
-  
+
   return getRandomTopicByGrade(userGrade);
 };
 
@@ -67,7 +110,7 @@ const getTopicFromSelectedModules = (userGrade, selectedModules) => {
 const generateAIQuestion = async (userHistory, userGrade, operation, selectedModules = [], isAiPreferred = false) => {
   try {
     const relevantTopic = getTopicFromSelectedModules(userGrade, selectedModules);
-    
+
     // Determine complexity based on user performance
     let complexityLevel = 'medium';
     if (userHistory && userHistory.length > 0) {
@@ -78,14 +121,14 @@ const generateAIQuestion = async (userHistory, userGrade, operation, selectedMod
     }
 
     // Build module context string
-    const moduleContext = selectedModules && selectedModules.length > 0 
+    const moduleContext = selectedModules && selectedModules.length > 0
       ? `Selected modules: ${selectedModules.join(', ')}\n`
       : '';
 
     // Determine the question type based on operation and modules
     let questionTypeGuidance = '';
     const hasLogicPatterns = selectedModules && selectedModules.some(m => m.includes('Logic & Patterns'));
-    
+
     if (hasLogicPatterns || operation === 'logic_patterns' || operation === 'logic_patterns_problem') {
       questionTypeGuidance = `QUESTION TYPE: Logic & Patterns - Generate UNIQUE pattern/sequence questions.
 VARIETY: Use different types each time:
@@ -177,12 +220,29 @@ Examples: "What is 2⁵?", "What is √144?", "Simplify: 3² × 3³", "What is 5
 CRITICAL: The answer must ALWAYS be a single number. Do NOT generate questions about growth rates or word problems.`;
     }
 
+    const wholeNumberDivisionOnly =
+      operation === 'division' && shouldUseWholeNumberDivisionOnly(userGrade);
+
+    const divisionGuidance = wholeNumberDivisionOnly
+      ? `
+DIVISION-SPECIFIC RULES:
+- Generate ONLY division questions with whole number answers.
+- The dividend must be exactly divisible by the divisor.
+- Do NOT generate decimal answers.
+- Do NOT generate fraction answers.
+- Do NOT generate remainder-based questions.
+- Examples allowed: 12 ÷ 3, 20 ÷ 5, 24 ÷ 6
+- Examples NOT allowed: 10 ÷ 3, 7 ÷ 2, 15 ÷ 4
+- The answer must be an integer only.
+`
+      : '';
     const prompt = `Generate a single UNIQUE and FRESH math question for a ${userGrade} grade student STRICTLY based on the selected modules.
 
 ${moduleContext}Topic: ${relevantTopic}
 Complexity: ${complexityLevel}
 
 ${questionTypeGuidance}
+${divisionGuidance}
 
 CRITICAL REQUIREMENTS:
 - MUST focus on the topic: "${relevantTopic}" from modules: ${selectedModules.join(', ')}
@@ -216,15 +276,20 @@ Do NOT include any text outside the JSON object.`;
         },
       }
     );
-    
+
     const raw = response.data.choices[0].message.content.trim();
-    
+
     // Parse JSON response from AI
     try {
       // Strip markdown code fences if present (```json ... ```)
       const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
       const parsed = JSON.parse(cleaned);
       if (parsed && parsed.question) {
+        if (!isValidWholeNumberDivisionResponse(parsed.question, parsed.answer, userGrade, operation)) {
+          const fallbackQ = generateWholeNumberDivisionQuestion(userGrade);
+          return { question: fallbackQ, answer: null };
+        }
+
         return {
           question: parsed.question,
           answer: parsed.answer !== undefined ? parsed.answer : null,
@@ -233,7 +298,7 @@ Do NOT include any text outside the JSON object.`;
     } catch (parseErr) {
       console.warn('AI response was not valid JSON, using raw text:', raw);
     }
-    
+
     // If JSON parsing failed, return raw text with no answer (fallback will compute)
     return { question: raw, answer: null };
   } catch (error) {
@@ -256,6 +321,9 @@ const generateFallbackQuestion = (operation, grade = '4-5') => {
 
   const complexity = gradeComplexity[grade] || gradeComplexity['4-5'];
 
+  if (operation === 'division' && shouldUseWholeNumberDivisionOnly(grade)) {
+    return generateWholeNumberDivisionQuestion(grade);
+  }
   const questionsMap = {
     addition: [
       `What is ${Math.floor(Math.random() * complexity.maxNum)} + ${Math.floor(Math.random() * complexity.maxOp)}?`,
@@ -390,7 +458,7 @@ const generateFallbackQuestion = (operation, grade = '4-5') => {
       `Identify the pattern: 2, 4, 8, 16, ___?`,
       `What is the next: 81, 64, 49, 36, ___?`,
       `Find the pattern: 11, 22, 33, 44, ___?`,
-      
+
       // Letter sequences
       `What comes next: A, B, C, D, ___?`,
       `Find the pattern: A, C, E, G, ___?`,
@@ -402,16 +470,16 @@ const generateFallbackQuestion = (operation, grade = '4-5') => {
       `Identify the pattern: A, Z, B, Y, C, ___?`,
       `What comes next: F, E, D, C, ___?`,
       `Find the pattern: A, C, F, J, ___?`,
-      
+
       // Shape/symbol patterns
       `What comes next in the pattern: △, ▭, ▲, ▢, ___?`,
       `Find the visual pattern: ●, ●●, ●●●, ___?`,
-      
+
       // Mixed patterns
       `What comes next: 1A, 2B, 3C, 4D, ___?`,
       `Identify the pattern: A1, A2, B2, B3, C3, ___?`,
       `Find the sequence: 5a, 10b, 15c, 20d, ___?`,
-      
+
       // Logic problems
       `If the pattern is multiply by 2: 1, 2, 4, 8, ___?`,
       `If the pattern is add 5 each time: 3, 8, 13, 18, ___?`,
@@ -426,7 +494,7 @@ const generateFallbackQuestion = (operation, grade = '4-5') => {
 
 const getWeakTopics = (history) => {
   if (!history || history.length === 0) return [];
-  
+
   const accuracy = {};
   history.forEach(log => {
     const op = log.operation || 'addition';
@@ -437,7 +505,10 @@ const getWeakTopics = (history) => {
 
   return Object.entries(accuracy)
     .map(([op, data]) => ({ op, rate: data.correct / data.total }))
-    .sort((a, b) => a.rate - b.rate)
+    .sort((a, b) => {
+      if (a.rate !== b.rate) return a.rate - b.rate;
+      return a.op.localeCompare(b.op);
+    })
     .map(item => item.op);
 };
 
