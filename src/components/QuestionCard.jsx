@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { generateQuestion } from '../services/aiService';
 import { saveAnswer, getUserAnswerHistory } from '../services/databaseService';
 import { calculateGradeAwareDifficulty } from '../data/mathModules';
-import { awardXP, getLevelTitle } from '../services/xpService';
+import { awardXP, calculateXPEarned, getLevelForXP, getLevelTitle, DEFAULT_DAILY_GOAL } from '../services/xpService';
 
 const TEST_QUESTION_COUNT = 10;
 const AUTO_ADVANCE_DELAY = 1800; // ms after correct answer before auto-advance
@@ -34,6 +34,7 @@ const parseFractionInput = (input) => {
 };
 
 export default function QuestionCard({ userId, userGrade, mode, selectedModules, onNext, onEndSession, onXPUpdate }) {
+  const isDemoMode = !userId || userId === 'demo-local' || String(userId).startsWith('demo-');
   const [question, setQuestion] = useState('');
   const [operation, setOperation] = useState('');
   const [userAnswer, setUserAnswer] = useState('');
@@ -60,6 +61,8 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [newLevelInfo, setNewLevelInfo] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [demoTotalXP, setDemoTotalXP] = useState(0);
+  const [demoDailyQuestions, setDemoDailyQuestions] = useState(0);
   const autoAdvanceRef = useRef(null);
   const historyRef = useRef(null);
 
@@ -142,7 +145,9 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
       // Get user history for adaptive questions (cached per session)
       let history = [];
       if (mode === 'play') {
-        if (!historyRef.current) {
+        if (isDemoMode && !historyRef.current) {
+          historyRef.current = [];
+        } else if (!historyRef.current) {
           historyRef.current = await getUserAnswerHistory(userId);
         }
         history = historyRef.current;
@@ -720,11 +725,30 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
 
     // Award XP
     try {
-      const xpResult = await awardXP(userId, {
-        correct,
-        streak: correct ? newStreak : 0,
-        difficulty: newDifficulty,
-      });
+      let xpResult;
+      if (isDemoMode) {
+        const xpEarned = calculateXPEarned(correct, correct ? newStreak : 0, newDifficulty);
+        const updatedTotalXP = demoTotalXP + xpEarned;
+        const updatedDailyQuestions = demoDailyQuestions + 1;
+        const previousLevel = getLevelForXP(demoTotalXP);
+        const updatedLevel = getLevelForXP(updatedTotalXP);
+        setDemoTotalXP(updatedTotalXP);
+        setDemoDailyQuestions(updatedDailyQuestions);
+        xpResult = {
+          xpEarned,
+          totalXP: updatedTotalXP,
+          level: updatedLevel,
+          leveledUp: updatedLevel > previousLevel,
+          dailyQuestions: updatedDailyQuestions,
+          dailyGoal: DEFAULT_DAILY_GOAL,
+        };
+      } else {
+        xpResult = await awardXP(userId, {
+          correct,
+          streak: correct ? newStreak : 0,
+          difficulty: newDifficulty,
+        });
+      }
 
       if (xpResult.xpEarned > 0) {
         setSessionXP(prev => prev + xpResult.xpEarned);
@@ -750,17 +774,23 @@ export default function QuestionCard({ userId, userGrade, mode, selectedModules,
       console.error('Error awarding XP:', error);
     }
 
-    // Save to database
-    try {
-      await saveAnswer(userId, {
-        question,
-        operation,
-        userAnswer: userVal,
-        correctAnswer,
-        correct,
-      });
-    } catch (error) {
-      console.error('Error saving answer:', error);
+    // Keep adaptive history in demo mode and persist only when backend is available
+    if (isDemoMode) {
+      if (mode === 'play') {
+        historyRef.current = [...(historyRef.current || []), { operation, correct }];
+      }
+    } else {
+      try {
+        await saveAnswer(userId, {
+          question,
+          operation,
+          userAnswer: userVal,
+          correctAnswer,
+          correct,
+        });
+      } catch (error) {
+        console.error('Error saving answer:', error);
+      }
     }
 
     // Auto-advance after correct answer (play mode only)
