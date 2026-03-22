@@ -505,7 +505,10 @@ const getWeakTopics = (history) => {
 
   return Object.entries(accuracy)
     .map(([op, data]) => ({ op, rate: data.correct / data.total }))
-    .sort((a, b) => a.rate - b.rate)
+    .sort((a, b) => {
+      if (a.rate !== b.rate) return a.rate - b.rate;
+      return a.op.localeCompare(b.op);
+    })
     .map(item => item.op);
 };
 
